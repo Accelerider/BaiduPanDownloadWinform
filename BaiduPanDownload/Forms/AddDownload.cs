@@ -1,4 +1,7 @@
 ﻿
+using BaiduPanDownload.Util;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,6 +10,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace BaiduPanDownload.Forms
@@ -42,7 +46,15 @@ namespace BaiduPanDownload.Forms
 
         long GetFreeSpace(string driveDirectoryName)
         {
-            return new DriveInfo(driveDirectoryName).AvailableFreeSpace;
+            try
+            {
+                return new DriveInfo(driveDirectoryName).AvailableFreeSpace;
+            }
+            catch
+            {
+                return 0L;
+            }
+            
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -62,7 +74,42 @@ namespace BaiduPanDownload.Forms
 
         private void button2_Click(object sender, EventArgs e)
         {
+            this.button2.Enabled = false;
+            this.button2.Text = "添加中...";
+            if (info.isdir == 1)
+            {
+                MessageBox.Show("即将添加文件夹下载,程序可能未响应一段时间!");
+            }
+            AddDownloadButton();
+        }
 
+        void AddDownloadButton()
+        {
+            if (checkBox1.Checked)
+            {
+                Program.config.DownloadPath = textBox1.Text;
+                Program.config.save();
+            }
+            if (!Directory.Exists(textBox1.Text))
+            {
+                MessageBox.Show("下载文件夹不存在!");
+                return;
+            }
+            if (info.isdir == 1)
+            {
+                Directory.CreateDirectory(textBox1.Text + "\\" + info.getName());
+                JObject jobj = JObject.Parse(WebTool.GetHtml(string.Format("https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={0}&path={1}", Program.config.Access_Token, info.path)));
+                foreach (JObject job in jobj["list"])
+                {
+                    BaiduPanDownload.Data.FileInfo fileinfo = JsonConvert.DeserializeObject<BaiduPanDownload.Data.FileInfo>(job.ToString());
+                    main.AddDownloadFile(fileinfo, textBox1.Text + "\\" + info.getName(), fileinfo.getName());
+
+                }
+                this.Close();
+                return;
+            }
+            main.AddDownloadFile(info, textBox1.Text, info.getName());
+            this.Close();
         }
     }
 }

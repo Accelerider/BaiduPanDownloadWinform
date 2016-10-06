@@ -17,11 +17,16 @@ namespace BaiduPanDownload.Util
         public string FileName { get; set; }
         public int ThreadNum { get; set; }
 
+        public bool Paste { get; set; }
+        public bool Stop { get; set; }
+
         long contentLength = 0L;
         long downloadLength = 0L;
         long speed = 0;
 
         DownloadThread[] threads;
+
+        int Complete = 0;
 
         public void Start()
         {
@@ -71,7 +76,6 @@ namespace BaiduPanDownload.Util
         void SpeedStatistics()
         {
             long back=0;
-            int num = 0;
             while (true)
             {
                 if (back == 0)
@@ -81,22 +85,22 @@ namespace BaiduPanDownload.Util
                 {
                     speed = downloadLength - back;
                     back = downloadLength;
-                    if (speed == 0)
-                    {
-                        num++;
-                    }
                 }
-                if (num > 5)
+                if (Complete >= threads.Length)
                 {
+                    if (Stop)
+                    {
+                        break;
+                    }
                     string[] files = new string[threads.Length];
-                    for(int i = 0; i < threads.Length; i++)
+                    for (int i = 0; i < threads.Length; i++)
                     {
                         files[i] = threads[i].FileName;
                     }
                     new CombineFiles
                     {
-                        Files=files,
-                        Path= DownLoadPath + "\\" + FileName
+                        Files = files,
+                        Path = DownLoadPath + "\\" + FileName
                     }.Start();
                     break;
                 }
@@ -104,9 +108,60 @@ namespace BaiduPanDownload.Util
             }
         }
 
+        public void PasteDownload()
+        {
+            foreach(DownloadThread thread in threads)
+            {
+                thread.Paste();
+            }
+            Paste = true;
+        }
+
+        public void ContinueDownload()
+        {
+            foreach (DownloadThread thread in threads)
+            {
+                thread.Continue();
+            }
+            Paste = false;
+        }
+
+        public void StopDownload()
+        {
+            if (DownloadComplete())
+            {
+                return;
+            }
+            Stop = true;
+            foreach (DownloadThread thread in threads)
+            {
+                thread.Stop();
+            }
+            Thread.Sleep(1000);
+            for (int i = 0; i < threads.Length; i++)
+            {
+                try
+                {
+                    File.Delete(threads[i].FileName);
+                }
+                catch { }
+                
+            }
+            
+        }
+
+        public bool DownloadComplete()
+        {
+            if (threads == null)
+            {
+                return false;
+            }
+            return Complete >= threads.Length;
+        }
+
         public float getSpeed()
         {
-            return (speed / 1024F / 1024F) > 1 ? (speed / 1024F / 1024F) : (speed / 1024F);
+            return speed;
         }
 
         public void addDownloadLength(long length)
@@ -120,6 +175,11 @@ namespace BaiduPanDownload.Util
         public float getDownloadPercentage()
         {
             return ((float)downloadLength / (float)contentLength * 100f);
+        }
+
+        public void addComplete()
+        {
+            this.Complete++;
         }
 
     }
@@ -136,6 +196,7 @@ class DownloadThread
 
     int errorNum = 0;
     bool isPaste = false;
+    bool isStop = false;
 
     public DownloadThread()
     {
@@ -148,6 +209,7 @@ class DownloadThread
         {
             HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Url);
             httpWebRequest.Timeout = 5000;
+            httpWebRequest.AddRange(From,To);
             HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
             long contentLength = httpWebResponse.ContentLength;
             Stream responseStream = httpWebResponse.GetResponseStream();
@@ -161,9 +223,17 @@ class DownloadThread
                 num = (long)i + num;
                 Application.DoEvents();
                 stream.Write(array, 0, i);
+                if (isStop)
+                {
+                    break;
+                }
                 //史上最sb的暂停方案
                 while (isPaste)
                 {
+                    if (isStop)
+                    {
+                        break;
+                    }
                     Thread.Sleep(1000);
                 }
                 i = responseStream.Read(array, 0, array.Length);
@@ -172,13 +242,14 @@ class DownloadThread
             }
             stream.Close();
             responseStream.Close();
+            download.addComplete();
         }
         catch(Exception ex)
         {
             errorNum++;
             if (errorNum > 5)
             {
-                MessageBox.Show("下载失败! 可能是网络错误:"+ex.Message);
+                MessageBox.Show("下载失败:"+ex.Message);
                 return;
             }
             new Thread(DownloadFile).Start();
@@ -193,5 +264,10 @@ class DownloadThread
     public void Continue()
     {
         isPaste = false;
+    }
+
+    public void Stop()
+    {
+        isStop = true;
     }
 }

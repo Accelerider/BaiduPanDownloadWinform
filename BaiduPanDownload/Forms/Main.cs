@@ -3,6 +3,7 @@ using BaiduPanDownload.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -21,8 +22,10 @@ namespace BaiduPanDownload.Forms
         string Path = string.Empty;
         readonly string HomePath = "/apps/wp2pcs";
 
+        ArrayList DownloadList = new ArrayList();
 
         Dictionary<string, FileInfo> Fileinfo = new Dictionary<string, FileInfo>();
+        Dictionary<string, HttpDownload> DownloadTaskInfo = new Dictionary<string, HttpDownload>();
 
         public Main()
         {
@@ -184,6 +187,7 @@ namespace BaiduPanDownload.Forms
             MessageBox.Show(
                 "吧要下载的文件放到您百度网盘的 [/我的应用数据/wp2pcs/] 目录,即可在本程序访问"+Environment.NewLine+
                 "双击文件为下载;双击目录为打开目录" +Environment.NewLine+
+                "文件夹下载请使用右键下载"+Environment.NewLine+
                 "如果刷新出现错误,请重新登录!"
                 ,"帮助"
                 );
@@ -210,8 +214,45 @@ namespace BaiduPanDownload.Forms
             }
             SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
             Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)", (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+            DownloadListView.View = View.Details;
             new Thread(updateFileList).Start(HomePath + Path);
+
         }
+
+        public void AddDownloadFile(FileInfo info,string DownloadPath,string FileName)
+        {
+            HttpDownload download = new HttpDownload
+            {
+                DownLoadUrl = string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token, info.path),
+                DownLoadPath = DownloadPath,
+                FileName = FileName,
+                ThreadNum = 8
+            };
+            DownloadList.Add(download);
+            download.Start();
+            ListViewItem item = new ListViewItem();
+            item.Text = download.FileName;
+            item.SubItems.Add(download.DownLoadPath);
+            item.SubItems.Add((getSizeMB((long)download.getSpeed()) < 1 ? (download.getSpeed() / 1024) + "K/s" : getSizeMB((long)download.getSpeed()) + "M/s"));
+            item.SubItems.Add(download.getDownloadPercentage() + "%");
+            item.SubItems.Add((download.DownloadComplete() ? "下载完成" : "下载中"));
+            DownloadListView.Items.Add(item);
+            DownloadTaskInfo.Add(download.FileName,download);
+        }
+
+        int getDownloadTaskNum()
+        {
+            int ret = 0;
+            for(int i = 0; i < DownloadListView.Items.Count; i++)
+            {
+                if (DownloadListView.Items[i].SubItems[4].Text == "下载中")
+                {
+                    ret++;
+                }
+            }
+            return ret;
+        }
+
 
         private void 新建文件夹ToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -239,23 +280,8 @@ namespace BaiduPanDownload.Forms
             }
             new Thread(updateFileList).Start(HomePath + Path);
         }
-
-        HttpDownload hp;
         private void button3_Click(object sender, EventArgs e)
         {
-            if (hp != null)
-            {
-                MessageBox.Show(hp.getSpeed()+"MB/s");
-                return;
-            }
-            hp=new HttpDownload
-            {
-                DownLoadUrl= "https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token=23.bf73f644404664381fdbde5bf070bf29.2592000.1478190202.2872528644-1641135&path=/apps/wp2pcs/[Navel] 月に寄りそう乙女の作法/[Navel] 月に寄りそう乙女の作法.part8.rar",
-                DownLoadPath="E:\\Test",
-                FileName="Test.rar",
-                ThreadNum=7
-            };
-            hp.Start();
         }
 
         private void 添加到下载列表ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -271,11 +297,7 @@ namespace BaiduPanDownload.Forms
                 return;
             }
             FileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
-            if (info.isdir == 1)
-            {
-                return;
-            }
-            string url = string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token, info.path);
+            //string url = string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token, info.path);
             new AddDownload(this, info).ShowDialog();
         }
 
@@ -304,6 +326,120 @@ namespace BaiduPanDownload.Forms
             catch (Exception ex)
             {
                 MessageBox.Show("访问剪贴板失败! " + ex.Message);
+            }
+        }
+
+        private void UpdateDownLoadList_Timer_Tick(object sender, EventArgs e)
+        {
+            DownloadListView.BeginUpdate();
+            //DownloadListView.Items.Clear();
+            for(int i = 0; i < DownloadList.Count; i++)
+            {
+                HttpDownload download = (HttpDownload)DownloadList[i];
+                DownloadListView.Items[i].SubItems[2].Text = (getSizeMB((long)download.getSpeed()) < 1 ? (download.getSpeed() / 1024) + "K/s" : getSizeMB((long)download.getSpeed()) + "M/s");
+                DownloadListView.Items[i].SubItems[3].Text = download.getDownloadPercentage() + "%";
+                DownloadListView.Items[i].SubItems[4].Text = download.Stop?"已终止":download.Paste?"暂停中":(download.DownloadComplete() ? "下载完成" : "下载中");
+            }
+            DownloadListView.EndUpdate();
+            return;
+            
+        }
+
+        private void 暂停ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (DownloadListView.SelectedIndices.Count <= 0)
+            {
+                MessageBox.Show("你没有选中任何任务哦");
+                return;
+            }
+            if (!DownloadTaskInfo.ContainsKey(DownloadListView.SelectedItems[0].Text))
+            {
+                MessageBox.Show("出现了未知错误! 请刷新重试");
+                return;
+            }
+
+            DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].PasteDownload();
+        }
+
+        private void 开始ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (DownloadListView.SelectedIndices.Count <= 0)
+            {
+                MessageBox.Show("你没有选中任何任务哦");
+                return;
+            }
+            if (!DownloadTaskInfo.ContainsKey(DownloadListView.SelectedItems[0].Text))
+            {
+                MessageBox.Show("出现了未知错误! 请刷新重试");
+                return;
+            }
+
+            DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].ContinueDownload();
+        }
+
+        void OpenFolderAndSelectFile(string fileFullName)
+        {
+            System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo("Explorer.exe");
+            psi.Arguments = "/e,/select," + fileFullName;
+            System.Diagnostics.Process.Start(psi);
+        }
+
+        private void 打开目录ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (DownloadListView.SelectedIndices.Count <= 0)
+            {
+                MessageBox.Show("你没有选中任何任务哦");
+                return;
+            }
+            if(DownloadListView.SelectedItems[0].SubItems[4].Text=="下载中"|| DownloadListView.SelectedItems[0].SubItems[4].Text == "暂停中" || DownloadListView.SelectedItems[0].SubItems[4].Text == "已终止")
+            {
+                MessageBox.Show("尚未下载完成");
+                return;
+            }
+            if (!DownloadTaskInfo.ContainsKey(DownloadListView.SelectedItems[0].Text))
+            {
+                MessageBox.Show("出现了未知错误! 请刷新重试");
+                return;
+            }
+            OpenFolderAndSelectFile(DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].DownLoadPath + "\\" + DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].FileName);
+        }
+
+        private void 终止ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (DownloadListView.SelectedIndices.Count <= 0)
+            {
+                MessageBox.Show("你没有选中任何任务哦");
+                return;
+            }
+            if (DownloadListView.SelectedItems[0].SubItems[4].Text == "下载完成" )
+            {
+                MessageBox.Show("已经下载完成了，没办法回头了。。");
+                return;
+            }
+            if (!DownloadTaskInfo.ContainsKey(DownloadListView.SelectedItems[0].Text))
+            {
+                MessageBox.Show("出现了未知错误! 请刷新重试");
+                return;
+            }
+            DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].StopDownload();
+        }
+
+        private void Main_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (getDownloadTaskNum() > 0)
+            {
+                DialogResult dr = MessageBox.Show("你还有任务未完成,退出程序意味着放弃所有下载(其实是我懒没写断点续传),是否继续?", "提示", MessageBoxButtons.OKCancel);
+                if (dr == DialogResult.OK)
+                {
+                    MessageBox.Show("即将开始清理下载产生的临时数据,请等待");
+                    foreach(HttpDownload download in DownloadList)
+                    {
+                        download.StopDownload();
+                    }
+                }else
+                {
+                    e.Cancel = true; ;
+                }
             }
         }
     }
