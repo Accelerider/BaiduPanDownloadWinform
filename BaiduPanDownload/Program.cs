@@ -29,18 +29,6 @@ namespace BaiduPanDownload
                     Access_Token = "null",
                     DownloadPath=@"D:\BaiduYunDownload"
                 }.save();
-                DialogResult dr = MessageBox.Show("欢迎使用!不介意的话要不要去本项目的GitHub点几个星星呢?", "提示", MessageBoxButtons.OKCancel);
-                if(dr == DialogResult.OK)
-                {
-                    try
-                    {
-                        System.Diagnostics.Process.Start("https://github.com/Mrs4s/BaiduPanDownload");
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("调用浏览器失败! " + ex.Message);
-                    }
-                }
             }
             config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Config.json"));
             Application.EnableVisualStyles();

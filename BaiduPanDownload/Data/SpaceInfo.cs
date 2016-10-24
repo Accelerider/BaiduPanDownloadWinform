@@ -10,5 +10,6 @@ namespace BaiduPanDownload.Data
         public long quota { get; set; }
         public long used { get; set; }
         public long request_id { get; set; }
+
     }
 }

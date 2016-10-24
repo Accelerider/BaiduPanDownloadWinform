@@ -1,0 +1,83 @@
+﻿using BaiduPanDownload.HttpTool;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace BaiduPanDownload.Managers
+{
+    class TaskManager
+    {
+        public static TaskManager GetTastManager { get; } = new TaskManager();
+
+        Dictionary<int, HttpTask> Tasks = new Dictionary<int, HttpTask>();
+
+        /// <summary>
+        /// 创建下载任务
+        /// </summary>
+        /// <param name="DownLoadUrl">下载链接</param>
+        /// <param name="DownLoadPath">下载路径</param>
+        /// <param name="FileName">保存文件名</param>
+        /// <param name="ThreadNum">下载线程数</param>
+        /// <returns></returns>
+        public HttpDownload CreateDownloadTask(string DownLoadUrl,string DownLoadPath,string FileName,int ThreadNum)
+        {
+            int id = Tasks.Count;
+            HttpTask task = new HttpDownload
+            {
+                ID=id,
+                DownLoadUrl=DownLoadUrl,
+                FilePath=DownLoadPath,
+                FileName=FileName,
+                ThreadNum=ThreadNum,
+            };
+            Tasks.Add(id, task);
+            return (HttpDownload)task;
+        }
+
+        /// <summary>
+        /// 创建上载任务
+        /// </summary>
+        /// <param name="FileName">保存文件名</param>
+        /// <param name="FilePath">上载文件路径</param>
+        /// <param name="UploadPath">保存目录</param>
+        /// <returns></returns>
+        public HttpUpload CreateUploadTask(string FileName,string FilePath,string UploadPath)
+        {
+            int id = Tasks.Count;
+            HttpTask task = new HttpUpload
+            {
+                ID = id,
+                FileName=FileName,
+                FilePath=FilePath,
+                UploadPath=UploadPath
+            };
+            Tasks.Add(id, task);
+            return (HttpUpload)task;
+        }
+
+        /// <summary>
+        /// 获取任务列表
+        /// </summary>
+        /// <returns></returns>
+        public HttpTask[] GetTasks()
+        {
+            HttpTask[] ret = new HttpTask[Tasks.Count];
+            foreach(var task in Tasks)
+            {
+                ret[task.Key] = task.Value;
+            }
+            return ret;
+        }
+
+        /// <summary>
+        /// 通过ID来获取任务
+        /// </summary>
+        /// <param name="id">任务ID</param>
+        /// <returns></returns>
+        public HttpTask GetTaskByID(int id)
+        {
+            return Tasks[id];
+        }
+    }
+}

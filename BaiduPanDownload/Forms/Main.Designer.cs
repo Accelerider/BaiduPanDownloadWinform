@@ -38,7 +38,10 @@
             this.下载ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.复制下载地址ToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.添加到下载列表ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.文件操作ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.文件信息ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.粘贴ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.复制ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.新建文件夹ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.删除ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.IconList = new System.Windows.Forms.ImageList(this.components);
@@ -62,9 +65,12 @@
             this.状态操作ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.暂停ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.开始ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.打开目录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.UpdateDownLoadList_Timer = new System.Windows.Forms.Timer(this.components);
             this.终止ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.打开目录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.UpdateDownLoadList_Timer = new System.Windows.Forms.Timer(this.components);
+            this.Test_Button = new System.Windows.Forms.Button();
+            this.xID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.InfoMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -105,6 +111,7 @@
             // 
             // FilelistView
             // 
+            this.FilelistView.AllowDrop = true;
             this.FilelistView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -115,13 +122,15 @@
             this.FilelistView.Size = new System.Drawing.Size(659, 410);
             this.FilelistView.TabIndex = 3;
             this.FilelistView.UseCompatibleStateImageBehavior = false;
+            this.FilelistView.DragDrop += new System.Windows.Forms.DragEventHandler(this.FilelistView_DragDrop);
+            this.FilelistView.DragEnter += new System.Windows.Forms.DragEventHandler(this.FilelistView_DragEnter);
             this.FilelistView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.FilelistView_MouseDoubleClick);
             // 
             // InfoMenu
             // 
             this.InfoMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.下载ToolStripMenuItem,
-            this.文件信息ToolStripMenuItem,
+            this.文件操作ToolStripMenuItem,
             this.新建文件夹ToolStripMenuItem,
             this.删除ToolStripMenuItem});
             this.InfoMenu.Name = "InfoMenu";
@@ -150,12 +159,35 @@
             this.添加到下载列表ToolStripMenuItem.Text = "添加到下载列表";
             this.添加到下载列表ToolStripMenuItem.Click += new System.EventHandler(this.添加到下载列表ToolStripMenuItem_Click);
             // 
+            // 文件操作ToolStripMenuItem
+            // 
+            this.文件操作ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.文件信息ToolStripMenuItem,
+            this.粘贴ToolStripMenuItem,
+            this.复制ToolStripMenuItem});
+            this.文件操作ToolStripMenuItem.Name = "文件操作ToolStripMenuItem";
+            this.文件操作ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.文件操作ToolStripMenuItem.Text = "文件操作";
+            // 
             // 文件信息ToolStripMenuItem
             // 
             this.文件信息ToolStripMenuItem.Name = "文件信息ToolStripMenuItem";
-            this.文件信息ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.文件信息ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.文件信息ToolStripMenuItem.Text = "文件信息";
-            this.文件信息ToolStripMenuItem.Click += new System.EventHandler(this.文件信息ToolStripMenuItem_Click);
+            this.文件信息ToolStripMenuItem.Click += new System.EventHandler(this.文件信息ToolStripMenuItem_Click_1);
+            // 
+            // 粘贴ToolStripMenuItem
+            // 
+            this.粘贴ToolStripMenuItem.Name = "粘贴ToolStripMenuItem";
+            this.粘贴ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.粘贴ToolStripMenuItem.Text = "粘贴";
+            // 
+            // 复制ToolStripMenuItem
+            // 
+            this.复制ToolStripMenuItem.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
+            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.复制ToolStripMenuItem.Text = "复制";
             // 
             // 新建文件夹ToolStripMenuItem
             // 
@@ -251,6 +283,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -302,6 +335,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.DownloadListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.xID,
             this.xName,
             this.DownLoadPath,
             this.Speed,
@@ -324,18 +358,18 @@
             // 
             // DownLoadPath
             // 
-            this.DownLoadPath.Text = "下载路径";
-            this.DownLoadPath.Width = 170;
+            this.DownLoadPath.Text = "文件路径";
+            this.DownLoadPath.Width = 120;
             // 
             // Speed
             // 
-            this.Speed.Text = "下载速度";
-            this.Speed.Width = 80;
+            this.Speed.Text = "传输速度";
+            this.Speed.Width = 113;
             // 
             // Schedule
             // 
-            this.Schedule.Text = "下载进度";
-            this.Schedule.Width = 80;
+            this.Schedule.Text = "传输进度";
+            this.Schedule.Width = 109;
             // 
             // State
             // 
@@ -357,29 +391,46 @@
             this.开始ToolStripMenuItem,
             this.终止ToolStripMenuItem});
             this.状态操作ToolStripMenuItem.Name = "状态操作ToolStripMenuItem";
-            this.状态操作ToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.状态操作ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.状态操作ToolStripMenuItem.Text = "状态操作";
             // 
             // 暂停ToolStripMenuItem
             // 
             this.暂停ToolStripMenuItem.Name = "暂停ToolStripMenuItem";
-            this.暂停ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.暂停ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.暂停ToolStripMenuItem.Text = "暂停";
             this.暂停ToolStripMenuItem.Click += new System.EventHandler(this.暂停ToolStripMenuItem_Click);
             // 
             // 开始ToolStripMenuItem
             // 
             this.开始ToolStripMenuItem.Name = "开始ToolStripMenuItem";
-            this.开始ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.开始ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
             this.开始ToolStripMenuItem.Text = "继续";
             this.开始ToolStripMenuItem.Click += new System.EventHandler(this.开始ToolStripMenuItem_Click);
+            // 
+            // 终止ToolStripMenuItem
+            // 
+            this.终止ToolStripMenuItem.Name = "终止ToolStripMenuItem";
+            this.终止ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.终止ToolStripMenuItem.Text = "终止";
+            this.终止ToolStripMenuItem.Click += new System.EventHandler(this.终止ToolStripMenuItem_Click);
             // 
             // 打开目录ToolStripMenuItem
             // 
             this.打开目录ToolStripMenuItem.Name = "打开目录ToolStripMenuItem";
-            this.打开目录ToolStripMenuItem.Size = new System.Drawing.Size(184, 22);
+            this.打开目录ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.打开目录ToolStripMenuItem.Text = "打开目录";
             this.打开目录ToolStripMenuItem.Click += new System.EventHandler(this.打开目录ToolStripMenuItem_Click);
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(673, 461);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "设置";
+            this.tabPage3.UseVisualStyleBackColor = true;
             // 
             // UpdateDownLoadList_Timer
             // 
@@ -387,18 +438,26 @@
             this.UpdateDownLoadList_Timer.Interval = 1000;
             this.UpdateDownLoadList_Timer.Tick += new System.EventHandler(this.UpdateDownLoadList_Timer_Tick);
             // 
-            // 终止ToolStripMenuItem
+            // Test_Button
             // 
-            this.终止ToolStripMenuItem.Name = "终止ToolStripMenuItem";
-            this.终止ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.终止ToolStripMenuItem.Text = "终止";
-            this.终止ToolStripMenuItem.Click += new System.EventHandler(this.终止ToolStripMenuItem_Click);
+            this.Test_Button.Location = new System.Drawing.Point(305, 523);
+            this.Test_Button.Name = "Test_Button";
+            this.Test_Button.Size = new System.Drawing.Size(75, 23);
+            this.Test_Button.TabIndex = 12;
+            this.Test_Button.Text = "Test";
+            this.Test_Button.UseVisualStyleBackColor = true;
+            this.Test_Button.Click += new System.EventHandler(this.Test_Button_Click);
+            // 
+            // xID
+            // 
+            this.xID.Text = "ID";
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(705, 558);
+            this.Controls.Add(this.Test_Button);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.Help_Link);
@@ -435,7 +494,6 @@
         private System.Windows.Forms.LinkLabel Blog_Link;
         private System.Windows.Forms.Button Back_Button;
         private System.Windows.Forms.ContextMenuStrip InfoMenu;
-        private System.Windows.Forms.ToolStripMenuItem 文件信息ToolStripMenuItem;
         private System.Windows.Forms.LinkLabel Help_Link;
         private System.Windows.Forms.ToolStripMenuItem 新建文件夹ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 删除ToolStripMenuItem;
@@ -460,5 +518,12 @@
         private System.Windows.Forms.ToolStripMenuItem 添加到下载列表ToolStripMenuItem;
         private System.Windows.Forms.Timer UpdateDownLoadList_Timer;
         private System.Windows.Forms.ToolStripMenuItem 终止ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 文件操作ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 文件信息ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 粘贴ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem 复制ToolStripMenuItem;
+        private System.Windows.Forms.Button Test_Button;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.ColumnHeader xID;
     }
 }

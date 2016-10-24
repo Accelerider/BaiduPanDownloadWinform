@@ -5,7 +5,7 @@ using System.Text;
 
 namespace BaiduPanDownload.Data
 {
-    public class FileInfo
+    public class DiskFileInfo
     {
 
         public long fs_id { get; set; }

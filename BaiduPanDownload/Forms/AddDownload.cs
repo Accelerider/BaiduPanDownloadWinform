@@ -1,4 +1,5 @@
 ﻿
+using BaiduPanDownload.HttpTool;
 using BaiduPanDownload.Util;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -18,8 +19,8 @@ namespace BaiduPanDownload.Forms
     public partial class AddDownload : Form
     {
         Main main;
-        BaiduPanDownload.Data.FileInfo info;
-        public AddDownload(Main main, BaiduPanDownload.Data.FileInfo info)
+        BaiduPanDownload.Data.DiskFileInfo info;
+        public AddDownload(Main main, BaiduPanDownload.Data.DiskFileInfo info)
         {
             InitializeComponent();
             this.main = main;
@@ -101,7 +102,7 @@ namespace BaiduPanDownload.Forms
                 JObject jobj = JObject.Parse(WebTool.GetHtml(string.Format("https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={0}&path={1}", Program.config.Access_Token, info.path)));
                 foreach (JObject job in jobj["list"])
                 {
-                    BaiduPanDownload.Data.FileInfo fileinfo = JsonConvert.DeserializeObject<BaiduPanDownload.Data.FileInfo>(job.ToString());
+                    BaiduPanDownload.Data.DiskFileInfo fileinfo = JsonConvert.DeserializeObject<BaiduPanDownload.Data.DiskFileInfo>(job.ToString());
                     main.AddDownloadFile(fileinfo, textBox1.Text + "\\" + info.getName(), fileinfo.getName());
 
                 }

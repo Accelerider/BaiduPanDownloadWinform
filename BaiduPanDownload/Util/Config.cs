@@ -13,18 +13,13 @@ namespace BaiduPanDownload.Util
     {
         public string Access_Token { get; set; }
         public string DownloadPath { get; set; }
-        public string Message
-        {
-            get
-            {
-                return "请不要泄漏Access_Token,有了这个就可以访问您的百度网盘!";
-            }
-        }
+        public string TempPath { get; } = AppDomain.CurrentDomain.BaseDirectory + "Temp";
+        public int ThreadNum { get; } = 8;
+        public JObject DownloadList { get; set; } = new JObject();
 
         public void save()
         {
             File.WriteAllText(AppDomain.CurrentDomain.BaseDirectory + "Config.json", JObject.Parse(JsonConvert.SerializeObject(this)).ToString());
-             
         }
     }
 }

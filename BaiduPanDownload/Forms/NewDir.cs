@@ -1,4 +1,5 @@
-﻿using BaiduPanDownload.Util;
+﻿using BaiduPanDownload.HttpTool;
+using BaiduPanDownload.Util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;

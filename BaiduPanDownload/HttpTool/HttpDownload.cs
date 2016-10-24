@@ -1,4 +1,5 @@
-﻿using BaiduPanDownload.Util;
+﻿using BaiduPanDownload.HttpTool;
+using BaiduPanDownload.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,17 +9,17 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace BaiduPanDownload.Util
+namespace BaiduPanDownload.HttpTool
 {
-    class HttpDownload
+    class HttpDownload : HttpTask
     {
         public string DownLoadUrl { get; set; }
-        public string DownLoadPath { get; set; }
-        public string FileName { get; set; }
-        public int ThreadNum { get; set; }
+        
+        public int ThreadNum { get; set; } = 1;
 
         public bool Paste { get; set; }
         public bool Stop { get; set; }
+
 
         long contentLength = 0L;
         long downloadLength = 0L;
@@ -28,15 +29,16 @@ namespace BaiduPanDownload.Util
 
         int Complete = 0;
 
-        public void Start()
+        public override void Start()
         {
-            if(!(DownLoadUrl!=null && DownLoadPath!=null && FileName!=null && ThreadNum != 0))
+
+            if(!(DownLoadUrl!=null && FilePath!=null && FileName!=null && ThreadNum != 0))
             {
                 return;
             }
-            
             try
             {
+                State = "下载中";
                 HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(DownLoadUrl);
                 HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
                 contentLength = httpWebResponse.ContentLength;
@@ -50,7 +52,7 @@ namespace BaiduPanDownload.Util
                         threads[i] = new DownloadThread
                         {
                             Url = DownLoadUrl,
-                            FileName = DownLoadPath + "\\" + FileName + "._tmp" + i.ToString(),
+                            FileName = FilePath + "\\" + FileName + "._tmp" + i.ToString(),
                             From = q * i,
                             To = contentLength,
                             download = this
@@ -60,7 +62,7 @@ namespace BaiduPanDownload.Util
                     threads[i] = new DownloadThread
                     {
                         Url = DownLoadUrl,
-                        FileName = DownLoadPath + "\\" + FileName + "._tmp" + i.ToString(),
+                        FileName = FilePath + "\\" + FileName + "._tmp" + i.ToString(),
                         From = q * i,
                         To = (q * (i + 1)) - 1,
                         download=this
@@ -69,6 +71,7 @@ namespace BaiduPanDownload.Util
             }
             catch(Exception ex)
             {
+                State = "下载失败";
                 MessageBox.Show("下载失败! 错误: "+ex.ToString());
             }
         }
@@ -97,11 +100,9 @@ namespace BaiduPanDownload.Util
                     {
                         files[i] = threads[i].FileName;
                     }
-                    new CombineFiles
-                    {
-                        Files = files,
-                        Path = DownLoadPath + "\\" + FileName
-                    }.Start();
+                    State = "拼接文件中";
+                    FileOperation.CombineFiles(files, FilePath + "\\" + FileName);
+                    State="下载完成";
                     break;
                 }
                 Thread.Sleep(1000);
@@ -117,8 +118,9 @@ namespace BaiduPanDownload.Util
             Paste = true;
         }
 
-        public void ContinueDownload()
+        public override void Continue()
         {
+            State = "下载中";
             foreach (DownloadThread thread in threads)
             {
                 thread.Continue();
@@ -159,7 +161,7 @@ namespace BaiduPanDownload.Util
             return Complete >= threads.Length;
         }
 
-        public float getSpeed()
+        public override long GetSpeed()
         {
             return speed;
         }
@@ -172,7 +174,7 @@ namespace BaiduPanDownload.Util
             }
         }
 
-        public float getDownloadPercentage()
+        public override float GetPercentage()
         {
             return ((float)downloadLength / (float)contentLength * 100f);
         }
@@ -182,6 +184,32 @@ namespace BaiduPanDownload.Util
             this.Complete++;
         }
 
+        public override string GetState()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override int GetType()
+        {
+            return 0;
+        }
+
+        public override void StopTask()
+        {
+            StopDownload();
+            State = "已停止";
+        }
+
+        public override void PasteTask()
+        {
+            State = "暂停中";
+            PasteDownload();
+        }
+
+        public override bool Runing()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 
@@ -211,38 +239,40 @@ class DownloadThread
             httpWebRequest.Timeout = 5000;
             httpWebRequest.AddRange(From,To);
             HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+            
             long contentLength = httpWebResponse.ContentLength;
-            Stream responseStream = httpWebResponse.GetResponseStream();
-            Stream stream;
-            stream = new FileStream(FileName, FileMode.Create);
-            long num = 0L;
-            byte[] array = new byte[1024];
-            int i = responseStream.Read(array, 0, array.Length);
-            while (i > 0)
+            using (Stream responseStream = httpWebResponse.GetResponseStream())
             {
-                num = (long)i + num;
-                Application.DoEvents();
-                stream.Write(array, 0, i);
-                if (isStop)
+                using (Stream stream = new FileStream(FileName, FileMode.Create))
                 {
-                    break;
-                }
-                //史上最sb的暂停方案
-                while (isPaste)
-                {
-                    if (isStop)
+                    long num = 0L;
+                    byte[] array = new byte[1024];
+                    int i = responseStream.Read(array, 0, array.Length);
+                    while (i > 0)
                     {
-                        break;
+                        num = (long)i + num;
+                        Application.DoEvents();
+                        stream.Write(array, 0, i);
+                        if (isStop)
+                        {
+                            break;
+                        }
+                        //史上最sb的暂停方案
+                        while (isPaste)
+                        {
+                            if (isStop)
+                            {
+                                break;
+                            }
+                            Thread.Sleep(1000);
+                        }
+                        i = responseStream.Read(array, 0, array.Length);
+                        download.addDownloadLength(i);
+                        Application.DoEvents();
                     }
-                    Thread.Sleep(1000);
+                    download.addComplete();
                 }
-                i = responseStream.Read(array, 0, array.Length);
-                download.addDownloadLength(i);
-                Application.DoEvents();
             }
-            stream.Close();
-            responseStream.Close();
-            download.addComplete();
         }
         catch(Exception ex)
         {

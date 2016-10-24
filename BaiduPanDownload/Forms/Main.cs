@@ -1,5 +1,6 @@
 ﻿using BaiduPanDownload.Data;
-using BaiduPanDownload.Util;
+using BaiduPanDownload.HttpTool;
+using BaiduPanDownload.Managers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -8,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -24,7 +26,7 @@ namespace BaiduPanDownload.Forms
 
         ArrayList DownloadList = new ArrayList();
 
-        Dictionary<string, FileInfo> Fileinfo = new Dictionary<string, FileInfo>();
+        Dictionary<string, DiskFileInfo> Fileinfo = new Dictionary<string, DiskFileInfo>();
         Dictionary<string, HttpDownload> DownloadTaskInfo = new Dictionary<string, HttpDownload>();
 
         public Main()
@@ -61,13 +63,13 @@ namespace BaiduPanDownload.Forms
             try
             {
                 Path_Lab.Text = "当前路径:" + path.ToString().Replace("apps", "我的应用数据");
-                JObject jobj = JObject.Parse(WebTool.GetHtml(string.Format("https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={0}&path={1}", Program.config.Access_Token, path.ToString())));
+                var jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path={path}"));
                 FilelistView.BeginUpdate();
                 FilelistView.Items.Clear();
                 Fileinfo.Clear();
                 foreach (JObject job in jobj["list"])
                 {
-                    FileInfo fileinfo = JsonConvert.DeserializeObject<FileInfo>(job.ToString());
+                    DiskFileInfo fileinfo = JsonConvert.DeserializeObject<DiskFileInfo>(job.ToString());
                     FilelistView.Items.Add(fileinfo.getName());
                     this.Fileinfo.Add(fileinfo.getName(), fileinfo);
                     if (fileinfo.isdir == 1)
@@ -117,24 +119,22 @@ namespace BaiduPanDownload.Forms
             }
             if (Fileinfo.ContainsKey(FilelistView.SelectedItems[0].Text))
             {
-                FileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
+                DiskFileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
                 if (info.isdir == 1)
                 {
                     Path += "/" + FilelistView.SelectedItems[0].Text;
-                    new Thread(updateFileList).Start(HomePath + Path);
+                    new Thread(this.updateFileList).Start(HomePath + Path);
                     return;
                 }
-
-                new AddDownload(this, info).ShowDialog();
-                /*
-                try
+                if (info.getSuffix() == "mp4" || info.getSuffix()=="mkv")
                 {
-                    System.Diagnostics.Process.Start(string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token,info.path));
-                }catch(Exception ex)
-                {
-                    MessageBox.Show("调用浏览器失败! "+ex.Message);
+                    new Video
+                    {
+                        info=info
+                    }.Show();
+                    return;
                 }
-                */
+                new AddDownload(this, info).ShowDialog();
             }
         }
 
@@ -150,7 +150,7 @@ namespace BaiduPanDownload.Forms
             new Thread(updateFileList).Start(HomePath + Path);
         }
 
-        private void 文件信息ToolStripMenuItem_Click(object sender, EventArgs e)
+        private void 文件信息ToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             if (FilelistView.SelectedIndices.Count <= 0)
             {
@@ -162,7 +162,7 @@ namespace BaiduPanDownload.Forms
                 MessageBox.Show("出现了未知错误! 请刷新重试");
                 return;
             }
-            FileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
+            DiskFileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
             MessageBox.Show(
                 "文件名: " + info.getName() + Environment.NewLine +
                 "文件大小: " + (getSizeGB(info.size) < 1 ? getSizeMB(info.size) + " MB" : getSizeGB(info.size) + " GB") + Environment.NewLine +
@@ -208,6 +208,10 @@ namespace BaiduPanDownload.Forms
         private void Main_Load(object sender, EventArgs e)
         {
             System.Net.ServicePointManager.DefaultConnectionLimit = 99999;
+            if (!Directory.Exists(Program.config.TempPath))
+            {
+                Directory.CreateDirectory(Program.config.TempPath);
+            }
             if (Program.config.Access_Token == "null" || Program.config.Access_Token == string.Empty)
             {
                 return;
@@ -219,33 +223,21 @@ namespace BaiduPanDownload.Forms
 
         }
 
-        public void AddDownloadFile(FileInfo info,string DownloadPath,string FileName)
+        public void AddDownloadFile(DiskFileInfo info,string DownloadPath,string FileName)
         {
-            HttpDownload download = new HttpDownload
+            if (DownloadTaskInfo.ContainsKey(FileName))
             {
-                DownLoadUrl = string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token, info.path),
-                DownLoadPath = DownloadPath,
-                FileName = FileName,
-                ThreadNum = 8
-            };
-            DownloadList.Add(download);
-            download.Start();
-            ListViewItem item = new ListViewItem();
-            item.Text = download.FileName;
-            item.SubItems.Add(download.DownLoadPath);
-            item.SubItems.Add((getSizeMB((long)download.getSpeed()) < 1 ? (download.getSpeed() / 1024) + "K/s" : getSizeMB((long)download.getSpeed()) + "M/s"));
-            item.SubItems.Add(download.getDownloadPercentage() + "%");
-            item.SubItems.Add((download.DownloadComplete() ? "下载完成" : "下载中"));
-            DownloadListView.Items.Add(item);
-            DownloadTaskInfo.Add(download.FileName,download);
+                MessageBox.Show("警告:任务已存在");
+            }
+            TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}", DownloadPath, FileName,10).Start();
         }
 
         int getDownloadTaskNum()
         {
-            int ret = 0;
+            var ret = 0;
             for(int i = 0; i < DownloadListView.Items.Count; i++)
             {
-                if (DownloadListView.Items[i].SubItems[4].Text == "下载中")
+                if (DownloadListView.Items[i].SubItems[4].Text == "下载中" || DownloadListView.Items[i].SubItems[4].Text=="暂停中")
                 {
                     ret++;
                 }
@@ -272,7 +264,7 @@ namespace BaiduPanDownload.Forms
                 MessageBox.Show("出现了未知错误! 请刷新重试");
                 return;
             }
-            FileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
+            DiskFileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
             if (WebTool.GetHtml(string.Format("https://pcs.baidu.com/rest/2.0/pcs/file?method=delete&access_token={0}&path={1}", Program.config.Access_Token, info.path)).Contains("ERROR"))
             {
                 MessageBox.Show("删除失败");
@@ -296,7 +288,7 @@ namespace BaiduPanDownload.Forms
                 MessageBox.Show("出现了未知错误! 请刷新重试");
                 return;
             }
-            FileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
+            DiskFileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
             //string url = string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token, info.path);
             new AddDownload(this, info).ShowDialog();
         }
@@ -313,7 +305,7 @@ namespace BaiduPanDownload.Forms
                 MessageBox.Show("出现了未知错误! 请刷新重试");
                 return;
             }
-            FileInfo info = Fileinfo[FilelistView.SelectedItems[0].Text];
+            var info = Fileinfo[FilelistView.SelectedItems[0].Text];
             if (info.isdir == 1)
             {
                 MessageBox.Show("不支持下载文件夹...");
@@ -321,7 +313,7 @@ namespace BaiduPanDownload.Forms
             }
             try
             {
-                Clipboard.SetDataObject(string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token, info.path));
+                Clipboard.SetDataObject($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}");
             }
             catch (Exception ex)
             {
@@ -333,13 +325,35 @@ namespace BaiduPanDownload.Forms
         {
             DownloadListView.BeginUpdate();
             //DownloadListView.Items.Clear();
+
+            foreach(HttpTask Task in TaskManager.GetTastManager.GetTasks())
+            {
+                if (DownloadListView.Items.Count==Task.ID)
+                {
+                    ListViewItem item = new ListViewItem();
+                    item.Text = Task.ID.ToString();
+                    item.SubItems.Add(Task.FileName);
+                    item.SubItems.Add(Task.FilePath);
+                    item.SubItems.Add((getSizeMB((long)Task.GetSpeed()) < 1 ? (Task.GetSpeed() / 1024) + "K/s" : getSizeMB((long)Task.GetSpeed()) + "M/s"));
+                    item.SubItems.Add(Task.GetPercentage()+"%");
+                    item.SubItems.Add(Task.State);
+                    DownloadListView.Items.Add(item);
+                    continue;
+                }
+                DownloadListView.Items[Task.ID].SubItems[3].Text= (getSizeMB((long)Task.GetSpeed()) < 1 ? (Task.GetSpeed() / 1024) + "K/s" : getSizeMB((long)Task.GetSpeed()) + "M/s");
+                DownloadListView.Items[Task.ID].SubItems[4].Text = Task.GetPercentage() + "%";
+                DownloadListView.Items[Task.ID].SubItems[5].Text = Task.State;
+            }
+
+            /*
             for(int i = 0; i < DownloadList.Count; i++)
             {
                 HttpDownload download = (HttpDownload)DownloadList[i];
-                DownloadListView.Items[i].SubItems[2].Text = (getSizeMB((long)download.getSpeed()) < 1 ? (download.getSpeed() / 1024) + "K/s" : getSizeMB((long)download.getSpeed()) + "M/s");
-                DownloadListView.Items[i].SubItems[3].Text = download.getDownloadPercentage() + "%";
+                DownloadListView.Items[i].SubItems[2].Text = (getSizeMB((long)download.GetSpeed()) < 1 ? (download.GetSpeed() / 1024) + "K/s" : getSizeMB((long)download.GetSpeed()) + "M/s");
+                DownloadListView.Items[i].SubItems[3].Text = download.GetPercentage() + "%";
                 DownloadListView.Items[i].SubItems[4].Text = download.Stop?"已终止":download.Paste?"暂停中":(download.DownloadComplete() ? "下载完成" : "下载中");
             }
+            */
             DownloadListView.EndUpdate();
             return;
             
@@ -347,34 +361,12 @@ namespace BaiduPanDownload.Forms
 
         private void 暂停ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (DownloadListView.SelectedIndices.Count <= 0)
-            {
-                MessageBox.Show("你没有选中任何任务哦");
-                return;
-            }
-            if (!DownloadTaskInfo.ContainsKey(DownloadListView.SelectedItems[0].Text))
-            {
-                MessageBox.Show("出现了未知错误! 请刷新重试");
-                return;
-            }
-
-            DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].PasteDownload();
+            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).PasteTask();
         }
 
         private void 开始ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (DownloadListView.SelectedIndices.Count <= 0)
-            {
-                MessageBox.Show("你没有选中任何任务哦");
-                return;
-            }
-            if (!DownloadTaskInfo.ContainsKey(DownloadListView.SelectedItems[0].Text))
-            {
-                MessageBox.Show("出现了未知错误! 请刷新重试");
-                return;
-            }
-
-            DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].ContinueDownload();
+            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).Continue();
         }
 
         void OpenFolderAndSelectFile(string fileFullName)
@@ -386,42 +378,17 @@ namespace BaiduPanDownload.Forms
 
         private void 打开目录ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (DownloadListView.SelectedIndices.Count <= 0)
+            if (!TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).State.Contains("完成") && TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).GetType()!=1)
             {
-                MessageBox.Show("你没有选中任何任务哦");
+                MessageBox.Show("任务未完成!");
                 return;
             }
-            if(DownloadListView.SelectedItems[0].SubItems[4].Text=="下载中"|| DownloadListView.SelectedItems[0].SubItems[4].Text == "暂停中" || DownloadListView.SelectedItems[0].SubItems[4].Text == "已终止")
-            {
-                MessageBox.Show("尚未下载完成");
-                return;
-            }
-            if (!DownloadTaskInfo.ContainsKey(DownloadListView.SelectedItems[0].Text))
-            {
-                MessageBox.Show("出现了未知错误! 请刷新重试");
-                return;
-            }
-            OpenFolderAndSelectFile(DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].DownLoadPath + "\\" + DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].FileName);
+            OpenFolderAndSelectFile(TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).FilePath);
         }
 
         private void 终止ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (DownloadListView.SelectedIndices.Count <= 0)
-            {
-                MessageBox.Show("你没有选中任何任务哦");
-                return;
-            }
-            if (DownloadListView.SelectedItems[0].SubItems[4].Text == "下载完成" )
-            {
-                MessageBox.Show("已经下载完成了，没办法回头了。。");
-                return;
-            }
-            if (!DownloadTaskInfo.ContainsKey(DownloadListView.SelectedItems[0].Text))
-            {
-                MessageBox.Show("出现了未知错误! 请刷新重试");
-                return;
-            }
-            DownloadTaskInfo[DownloadListView.SelectedItems[0].Text].StopDownload();
+            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).StopTask();
         }
 
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
@@ -440,6 +407,29 @@ namespace BaiduPanDownload.Forms
                 {
                     e.Cancel = true; ;
                 }
+            }
+        }
+        private void Test_Button_Click(object sender, EventArgs e)
+        {
+            new Video().Show();
+        }
+
+        private void FilelistView_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Link;
+                return;
+            }
+            e.Effect = DragDropEffects.None;
+        }
+
+        private void FilelistView_DragDrop(object sender, DragEventArgs e)
+        {
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
+            foreach(string file in files)
+            {
+                TaskManager.GetTastManager.CreateUploadTask(file.Split('\\')[file.Split('\\').Length-1], file, HomePath + Path).Start();
             }
         }
     }
