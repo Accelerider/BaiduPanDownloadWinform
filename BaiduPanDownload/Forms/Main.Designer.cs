@@ -56,6 +56,7 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
             this.DownloadListView = new System.Windows.Forms.ListView();
+            this.xID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.xName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.DownLoadPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Speed = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -70,12 +71,13 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.UpdateDownLoadList_Timer = new System.Windows.Forms.Timer(this.components);
             this.Test_Button = new System.Windows.Forms.Button();
-            this.xID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.label2 = new System.Windows.Forms.Label();
             this.InfoMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.DownLoadListMenu.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -135,6 +137,7 @@
             this.删除ToolStripMenuItem});
             this.InfoMenu.Name = "InfoMenu";
             this.InfoMenu.Size = new System.Drawing.Size(137, 92);
+            this.InfoMenu.Opening += new System.ComponentModel.CancelEventHandler(this.InfoMenu_Opening);
             // 
             // 下载ToolStripMenuItem
             // 
@@ -166,7 +169,7 @@
             this.粘贴ToolStripMenuItem,
             this.复制ToolStripMenuItem});
             this.文件操作ToolStripMenuItem.Name = "文件操作ToolStripMenuItem";
-            this.文件操作ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.文件操作ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.文件操作ToolStripMenuItem.Text = "文件操作";
             // 
             // 文件信息ToolStripMenuItem
@@ -179,15 +182,17 @@
             // 粘贴ToolStripMenuItem
             // 
             this.粘贴ToolStripMenuItem.Name = "粘贴ToolStripMenuItem";
-            this.粘贴ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.粘贴ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.粘贴ToolStripMenuItem.Text = "粘贴";
+            this.粘贴ToolStripMenuItem.Click += new System.EventHandler(this.粘贴ToolStripMenuItem_Click);
             // 
             // 复制ToolStripMenuItem
             // 
             this.复制ToolStripMenuItem.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
-            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.复制ToolStripMenuItem.Text = "复制";
+            this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
             // 
             // 新建文件夹ToolStripMenuItem
             // 
@@ -351,15 +356,19 @@
             this.DownloadListView.UseCompatibleStateImageBehavior = false;
             this.DownloadListView.View = System.Windows.Forms.View.Details;
             // 
+            // xID
+            // 
+            this.xID.Text = "ID";
+            // 
             // xName
             // 
             this.xName.Text = "文件名";
-            this.xName.Width = 189;
+            this.xName.Width = 146;
             // 
             // DownLoadPath
             // 
             this.DownLoadPath.Text = "文件路径";
-            this.DownLoadPath.Width = 120;
+            this.DownLoadPath.Width = 147;
             // 
             // Speed
             // 
@@ -369,7 +378,7 @@
             // Schedule
             // 
             this.Schedule.Text = "传输进度";
-            this.Schedule.Width = 109;
+            this.Schedule.Width = 97;
             // 
             // State
             // 
@@ -424,6 +433,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.label2);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
@@ -446,11 +456,17 @@
             this.Test_Button.TabIndex = 12;
             this.Test_Button.Text = "Test";
             this.Test_Button.UseVisualStyleBackColor = true;
+            this.Test_Button.Visible = false;
             this.Test_Button.Click += new System.EventHandler(this.Test_Button_Click);
             // 
-            // xID
+            // label2
             // 
-            this.xID.Text = "ID";
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(250, 224);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(125, 12);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "暂无。。有时间就写上";
             // 
             // Main
             // 
@@ -477,6 +493,8 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             this.DownLoadListMenu.ResumeLayout(false);
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -525,5 +543,6 @@
         private System.Windows.Forms.Button Test_Button;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.ColumnHeader xID;
+        private System.Windows.Forms.Label label2;
     }
 }

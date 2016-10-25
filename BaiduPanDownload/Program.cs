@@ -29,6 +29,7 @@ namespace BaiduPanDownload
                     Access_Token = "null",
                     DownloadPath=@"D:\BaiduYunDownload"
                 }.save();
+                MessageBox.Show("欢迎使用本工具,,因为你懂的原因。。请低调使用!");
             }
             config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Config.json"));
             Application.EnableVisualStyles();

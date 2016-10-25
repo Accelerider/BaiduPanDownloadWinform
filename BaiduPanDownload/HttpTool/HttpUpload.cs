@@ -17,8 +17,6 @@ namespace BaiduPanDownload.HttpTool
     {
         public string UploadPath { get; set; } = "/apps/wp2pcs";
 
-        bool bRuning { get; set; }
-
         ArrayList TaskList = new ArrayList();
         WebClient Client = new WebClient();
         long Speed = 0L;
@@ -36,17 +34,17 @@ namespace BaiduPanDownload.HttpTool
             {
                 return;
             }
-            bRuning = true;
+            Running = true;
             UploadPath += $"/{FileName}";
             State = "正在尝试秒传";
             if(RapidUpload(FilePath, FileName, UploadPath))
             {
-                bRuning = false;
                 State = "秒传完成";
+                SetComplete();
                 return;
             }
-            //如果小于50M
             State = "上传中";
+            //如果小于20M
             if (new FileInfo(FilePath).Length <= (20 * 1024 * 1024))
             {
                 TaskList.Add(new UploadTask
@@ -82,9 +80,11 @@ namespace BaiduPanDownload.HttpTool
             UploadTask Task = (UploadTask)TaskList[TaskID];
             if (TaskList.Count == 1)
             {
+                //一次性上传
                 Client.UploadFileAsync(new Uri($"https://pcs.baidu.com/rest/2.0/pcs/file?method=upload&path={UploadPath}&access_token={Program.config.Access_Token}"), FilePath);
             }else
             {
+                //分片上传
                 Client.UploadFileAsync(new Uri($"https://pcs.baidu.com/rest/2.0/pcs/file?method=upload&access_token={Program.config.Access_Token}&type=tmpfile"), Task.FilePath);
             }
         }
@@ -146,8 +146,9 @@ namespace BaiduPanDownload.HttpTool
                     WebTool.CreatePostHttpResponse($"https://pcs.baidu.com/rest/2.0/file?method=createsuperfile&path={UploadPath}&access_token={Program.config.Access_Token}", parameters, null, null, Encoding.UTF8, null);
                 }
                 State = "上传完成";
-                bRuning = false;
-            }else
+                SetComplete();
+            }
+            else
             {
                 UploadingTaskID++;
                 Upload(UploadingTaskID);
@@ -252,6 +253,7 @@ namespace BaiduPanDownload.HttpTool
                     
                 }
             }
+            SetComplete();
             State = "已停止";
         }
 
@@ -265,12 +267,7 @@ namespace BaiduPanDownload.HttpTool
             return ((float)BytesSent / (float)new FileInfo(FilePath).Length * 100f);
         }
 
-        public override bool Runing()
-        {
-            return bRuning;
-        }
-
-        public override void Continue()
+        public override void ContinueTask()
         {
             MessageBox.Show("由于作者过于zz，上传任务并不能暂停。。");
         }

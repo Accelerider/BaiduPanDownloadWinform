@@ -8,13 +8,20 @@ namespace BaiduPanDownload.HttpTool
     abstract class HttpTask
     {
         public int ID { get; set; }
+
         public string FileName { get; set; }
+
         public string FilePath { get; set; }
+
         public string State { get; set; } = "等待中";
+
+        public bool Running { get; set; } = false;
+
+        public bool TaskComplete { get; set; } = false;
 
         public abstract long GetSpeed();
 
-        public abstract void Continue();
+        public abstract void ContinueTask();
 
         public abstract float GetPercentage();
 
@@ -22,12 +29,16 @@ namespace BaiduPanDownload.HttpTool
 
         public abstract new int GetType();
 
-        public abstract bool Runing();
-
         public abstract void Start();
 
         public abstract void StopTask();
 
         public abstract void PasteTask();
+
+        protected void  SetComplete()
+        {
+            Running = false;
+            TaskComplete = true;
+        }
     }
 }

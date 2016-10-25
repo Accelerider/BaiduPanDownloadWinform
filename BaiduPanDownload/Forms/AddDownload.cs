@@ -1,4 +1,5 @@
 ﻿
+using BaiduPanDownload.Data;
 using BaiduPanDownload.HttpTool;
 using BaiduPanDownload.Util;
 using Newtonsoft.Json;
@@ -98,13 +99,15 @@ namespace BaiduPanDownload.Forms
             }
             if (info.isdir == 1)
             {
-                Directory.CreateDirectory(textBox1.Text + "\\" + info.getName());
-                JObject jobj = JObject.Parse(WebTool.GetHtml(string.Format("https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={0}&path={1}", Program.config.Access_Token, info.path)));
-                foreach (JObject job in jobj["list"])
+                foreach (DiskFileInfo dfi in info.getFileList())
                 {
-                    BaiduPanDownload.Data.DiskFileInfo fileinfo = JsonConvert.DeserializeObject<BaiduPanDownload.Data.DiskFileInfo>(job.ToString());
-                    main.AddDownloadFile(fileinfo, textBox1.Text + "\\" + info.getName(), fileinfo.getName());
-
+                    string downloadPath = (textBox1.Text + dfi.path.Replace(dfi.getName(), string.Empty).Replace("/apps/wp2pcs", string.Empty).Replace("/", "\\"));
+                    downloadPath = downloadPath.Substring(0, downloadPath.Length-1);
+                    if (!Directory.Exists(downloadPath))
+                    {
+                        Directory.CreateDirectory(downloadPath);
+                    }
+                    main.AddDownloadFile(dfi, downloadPath, dfi.getName());
                 }
                 this.Close();
                 return;

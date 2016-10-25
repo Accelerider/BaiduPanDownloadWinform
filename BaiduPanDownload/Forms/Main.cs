@@ -188,7 +188,8 @@ namespace BaiduPanDownload.Forms
                 "吧要下载的文件放到您百度网盘的 [/我的应用数据/wp2pcs/] 目录,即可在本程序访问"+Environment.NewLine+
                 "双击文件为下载;双击目录为打开目录" +Environment.NewLine+
                 "文件夹下载请使用右键下载"+Environment.NewLine+
-                "如果刷新出现错误,请重新登录!"
+                "如果刷新出现错误,请重新登录!"+Environment.NewLine+
+                "新增加上传文件!直接把文件拖入即可,不支持文件夹!!!"
                 ,"帮助"
                 );
         }
@@ -229,7 +230,7 @@ namespace BaiduPanDownload.Forms
             {
                 MessageBox.Show("警告:任务已存在");
             }
-            TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}", DownloadPath, FileName,10).Start();
+            TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}", DownloadPath, FileName,8);
         }
 
         int getDownloadTaskNum()
@@ -278,11 +279,6 @@ namespace BaiduPanDownload.Forms
 
         private void 添加到下载列表ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (FilelistView.SelectedIndices.Count <= 0)
-            {
-                MessageBox.Show("你没有选中任何文件哦");
-                return;
-            }
             if (!Fileinfo.ContainsKey(FilelistView.SelectedItems[0].Text))
             {
                 MessageBox.Show("出现了未知错误! 请刷新重试");
@@ -295,11 +291,6 @@ namespace BaiduPanDownload.Forms
 
         private void 复制下载地址ToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            if (FilelistView.SelectedIndices.Count <= 0)
-            {
-                MessageBox.Show("你没有选中任何文件哦");
-                return;
-            }
             if (!Fileinfo.ContainsKey(FilelistView.SelectedItems[0].Text))
             {
                 MessageBox.Show("出现了未知错误! 请刷新重试");
@@ -366,7 +357,7 @@ namespace BaiduPanDownload.Forms
 
         private void 开始ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).Continue();
+            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).ContinueTask();
         }
 
         void OpenFolderAndSelectFile(string fileFullName)
@@ -383,7 +374,7 @@ namespace BaiduPanDownload.Forms
                 MessageBox.Show("任务未完成!");
                 return;
             }
-            OpenFolderAndSelectFile(TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).FilePath);
+            OpenFolderAndSelectFile(TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).FilePath+"\\"+ TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).FileName);
         }
 
         private void 终止ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -393,19 +384,19 @@ namespace BaiduPanDownload.Forms
 
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (getDownloadTaskNum() > 0)
+            if (TaskManager.GetTastManager.GetDownloadingTaskNum() > 0)
             {
                 DialogResult dr = MessageBox.Show("你还有任务未完成,退出程序意味着放弃所有下载(其实是我懒没写断点续传),是否继续?", "提示", MessageBoxButtons.OKCancel);
                 if (dr == DialogResult.OK)
                 {
                     MessageBox.Show("即将开始清理下载产生的临时数据,请等待");
-                    foreach(HttpDownload download in DownloadList)
+                    foreach(HttpTask Task in TaskManager.GetTastManager.GetTasks())
                     {
-                        download.StopDownload();
+                        Task.StopTask();
                     }
                 }else
                 {
-                    e.Cancel = true; ;
+                    e.Cancel = true;
                 }
             }
         }
@@ -430,6 +421,25 @@ namespace BaiduPanDownload.Forms
             foreach(string file in files)
             {
                 TaskManager.GetTastManager.CreateUploadTask(file.Split('\\')[file.Split('\\').Length-1], file, HomePath + Path).Start();
+            }
+        }
+
+        private void 粘贴ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("还没写完。。");
+        }
+
+        private void 复制ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("还没写完。。");
+        }
+
+        private void InfoMenu_Opening(object sender, CancelEventArgs e)
+        {
+            if (FilelistView.SelectedIndices.Count <= 0)
+            {
+                e.Cancel = true;
+                return;
             }
         }
     }

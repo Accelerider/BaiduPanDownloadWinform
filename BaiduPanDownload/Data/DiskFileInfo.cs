@@ -1,4 +1,8 @@
-﻿using System;
+﻿using BaiduPanDownload.HttpTool;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,6 +33,28 @@ namespace BaiduPanDownload.Data
             return tmp[tmp.Length - 1];
         }
 
-
+        public DiskFileInfo[] getFileList()
+        {
+            if (isdir != 1)
+            {
+                return null;
+            }
+            ArrayList FileList = new ArrayList();
+            JObject jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path={path}"));
+            foreach (JObject job in jobj["list"])
+            {
+                DiskFileInfo fileinfo = JsonConvert.DeserializeObject<BaiduPanDownload.Data.DiskFileInfo>(job.ToString());
+                if (fileinfo.isdir == 1)
+                {
+                    foreach(DiskFileInfo info in fileinfo.getFileList())
+                    {
+                        FileList.Add(info);
+                    }
+                    continue;
+                }
+                FileList.Add(fileinfo);
+            }
+            return (DiskFileInfo[])FileList.ToArray(typeof(DiskFileInfo));
+        }
     }
 }

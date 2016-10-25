@@ -36,6 +36,7 @@ namespace BaiduPanDownload.HttpTool
             {
                 return;
             }
+            Running = true;
             try
             {
                 State = "下载中";
@@ -59,6 +60,7 @@ namespace BaiduPanDownload.HttpTool
                         };
                         break;
                     }
+                    
                     threads[i] = new DownloadThread
                     {
                         Url = DownLoadUrl,
@@ -72,6 +74,7 @@ namespace BaiduPanDownload.HttpTool
             catch(Exception ex)
             {
                 State = "下载失败";
+                Running = false;
                 MessageBox.Show("下载失败! 错误: "+ex.ToString());
             }
         }
@@ -102,6 +105,8 @@ namespace BaiduPanDownload.HttpTool
                     }
                     State = "拼接文件中";
                     FileOperation.CombineFiles(files, FilePath + "\\" + FileName);
+                    Running = false;
+                    TaskComplete = true;
                     State="下载完成";
                     break;
                 }
@@ -111,20 +116,32 @@ namespace BaiduPanDownload.HttpTool
 
         public void PasteDownload()
         {
-            foreach(DownloadThread thread in threads)
+            if (DownloadComplete())
+            {
+                return;
+            }
+            State = "暂停中";
+            foreach (DownloadThread thread in threads)
             {
                 thread.Paste();
             }
+            Running = false;
             Paste = true;
         }
 
-        public override void Continue()
+        public override void ContinueTask()
         {
+            if (DownloadComplete())
+            {
+                return;
+            }
+
             State = "下载中";
             foreach (DownloadThread thread in threads)
             {
                 thread.Continue();
             }
+            Running = true;
             Paste = false;
         }
 
@@ -134,7 +151,8 @@ namespace BaiduPanDownload.HttpTool
             {
                 return;
             }
-            Stop = true;
+            State = "已停止";
+            SetComplete();
             foreach (DownloadThread thread in threads)
             {
                 thread.Stop();
@@ -197,19 +215,14 @@ namespace BaiduPanDownload.HttpTool
         public override void StopTask()
         {
             StopDownload();
-            State = "已停止";
+           
         }
 
         public override void PasteTask()
         {
-            State = "暂停中";
             PasteDownload();
         }
 
-        public override bool Runing()
-        {
-            throw new NotImplementedException();
-        }
     }
 
 

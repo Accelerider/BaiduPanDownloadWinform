@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Timers;
 
 namespace BaiduPanDownload.Managers
 {
@@ -11,6 +12,53 @@ namespace BaiduPanDownload.Managers
         public static TaskManager GetTastManager { get; } = new TaskManager();
 
         Dictionary<int, HttpTask> Tasks = new Dictionary<int, HttpTask>();
+
+
+        public TaskManager()
+        {
+            Timer TaskManagerTimer = new Timer(1000)
+            {
+                AutoReset = true,
+                Enabled = true
+            };
+            TaskManagerTimer.Elapsed += TaskManagerTimer_Elapsed;
+            TaskManagerTimer.Start();
+        }
+
+        private void TaskManagerTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            if (GetDownloadingTaskNum() < Program.config.TaskNum)
+            {
+                foreach(var task in Tasks)
+                {
+                    if (!task.Value.Running && !task.Value.TaskComplete)
+                    {
+                        task.Value.Start();
+                        break;
+                    }
+                }
+            }
+        }
+
+
+
+        /// <summary>
+        /// 获取正在执行的任务数量
+        /// </summary>
+        /// <returns></returns>
+        public int GetDownloadingTaskNum()
+        {
+            int ret=0;
+            foreach(var task in Tasks)
+            {
+                if (task.Value.Running)
+                {
+                    ret++;
+                }
+            }
+            return ret;
+        }
+
 
         /// <summary>
         /// 创建下载任务
@@ -34,6 +82,7 @@ namespace BaiduPanDownload.Managers
             Tasks.Add(id, task);
             return (HttpDownload)task;
         }
+
 
         /// <summary>
         /// 创建上载任务
