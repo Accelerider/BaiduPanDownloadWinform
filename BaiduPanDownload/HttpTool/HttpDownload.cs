@@ -17,7 +17,6 @@ namespace BaiduPanDownload.HttpTool
         
         public int ThreadNum { get; set; } = 1;
 
-        public bool Paste { get; set; }
         public bool Stop { get; set; }
 
 
@@ -31,7 +30,6 @@ namespace BaiduPanDownload.HttpTool
 
         public override void Start()
         {
-
             if(!(DownLoadUrl!=null && FilePath!=null && FileName!=null && ThreadNum != 0))
             {
                 return;

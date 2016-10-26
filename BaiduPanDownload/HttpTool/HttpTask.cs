@@ -13,11 +13,13 @@ namespace BaiduPanDownload.HttpTool
 
         public string FilePath { get; set; }
 
-        public string State { get; set; } = "等待中";
+        public string State { get; protected set; } = "等待中";
 
-        public bool Running { get; set; } = false;
+        public bool Running { get; protected set; } = false;
 
-        public bool TaskComplete { get; set; } = false;
+        public bool Paste { get; protected set; } = false;
+
+        public bool TaskComplete { get; protected set; } = false;
 
         public abstract long GetSpeed();
 

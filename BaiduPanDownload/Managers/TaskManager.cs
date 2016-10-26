@@ -31,7 +31,7 @@ namespace BaiduPanDownload.Managers
             {
                 foreach(var task in Tasks)
                 {
-                    if (!task.Value.Running && !task.Value.TaskComplete)
+                    if (!task.Value.Running && !task.Value.TaskComplete && !task.Value.Paste)
                     {
                         task.Value.Start();
                         break;
