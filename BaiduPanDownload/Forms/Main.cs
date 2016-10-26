@@ -221,7 +221,38 @@ namespace BaiduPanDownload.Forms
             Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)", (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
             DownloadListView.View = View.Details;
             new Thread(updateFileList).Start(HomePath + Path);
+            new Thread(Upgraded).Start();
+        }
 
+        /// <summary>
+        /// 检查更新
+        /// </summary>
+        void Upgraded()
+        {
+            try
+            {
+                JObject job=JObject.Parse(WebTool.GetHtml("http://www.mrs4s.top/api/update.json"));
+                if ((int)job["Build"] > 2)
+                {
+                    
+                    DialogResult dr = MessageBox.Show((string)job["Message"]+"\r\n\r\n是否更新?", "发现更新", MessageBoxButtons.OKCancel);
+                    if (dr == DialogResult.OK)
+                    {
+                        try
+                        {
+                            System.Diagnostics.Process.Start((string)job["Yes_Button"]);
+                        }
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show("调用浏览器失败! " + ex.Message);
+                        }
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
         }
 
         public void AddDownloadFile(DiskFileInfo info,string DownloadPath,string FileName)
