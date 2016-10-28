@@ -473,5 +473,14 @@ namespace BaiduPanDownload.Forms
                 return;
             }
         }
+
+        private void DownLoadListMenu_Opening(object sender, CancelEventArgs e)
+        {
+            if (DownloadListView.SelectedIndices.Count <= 0)
+            {
+                e.Cancel = true;
+                return;
+            }
+        }
     }
 }
