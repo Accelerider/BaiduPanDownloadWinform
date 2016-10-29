@@ -4,10 +4,11 @@
 添加文件夹下载,拖入即可</br>
 低调使用。。以免和谐！</br>
 添加在线播放视频 调用的WMP。。虽然兼容性不好 至少效率比云管家高</br>
+使用教程可以看:http://www.mrs4s.top/2016/10/06/%E3%80%90c%E5%B0%8F%E5%B7%A5%E5%85%B7%E3%80%91%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98%E4%B8%8D%E9%99%90%E9%80%9F%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7/</br>
 觉得不错请点星星O(∩_∩)O~</br>
 
 # 无图无真相
 <img class="alignnone size-full wp-image-99" src="http://www.mrs4s.top/wp-content/uploads/2016/10/QQ截图20161006195541.png" alt="qq%e6%88%aa%e5%9b%be20161006195541" width="721" height="597" />
 
 # 软件下载:
-链接: https://pan.baidu.com/s/1i5wOMCt 提取码: 4酱
+链接: <a href="https://pan.baidu.com/s/1i5wOMCt">https://pan.baidu.com/s/1i5wOMCt</a> 提取码: 4酱
