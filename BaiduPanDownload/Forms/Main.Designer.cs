@@ -69,9 +69,9 @@
             this.终止ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.打开目录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.label2 = new System.Windows.Forms.Label();
             this.UpdateDownLoadList_Timer = new System.Windows.Forms.Timer(this.components);
             this.Test_Button = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
             this.InfoMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -126,6 +126,7 @@
             this.FilelistView.UseCompatibleStateImageBehavior = false;
             this.FilelistView.DragDrop += new System.Windows.Forms.DragEventHandler(this.FilelistView_DragDrop);
             this.FilelistView.DragEnter += new System.Windows.Forms.DragEventHandler(this.FilelistView_DragEnter);
+            this.FilelistView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FilelistView_KeyDown);
             this.FilelistView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.FilelistView_MouseDoubleClick);
             // 
             // InfoMenu
@@ -169,7 +170,7 @@
             this.粘贴ToolStripMenuItem,
             this.复制ToolStripMenuItem});
             this.文件操作ToolStripMenuItem.Name = "文件操作ToolStripMenuItem";
-            this.文件操作ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.文件操作ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.文件操作ToolStripMenuItem.Text = "文件操作";
             // 
             // 文件信息ToolStripMenuItem
@@ -182,7 +183,7 @@
             // 粘贴ToolStripMenuItem
             // 
             this.粘贴ToolStripMenuItem.Name = "粘贴ToolStripMenuItem";
-            this.粘贴ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.粘贴ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.粘贴ToolStripMenuItem.Text = "粘贴";
             this.粘贴ToolStripMenuItem.Click += new System.EventHandler(this.粘贴ToolStripMenuItem_Click);
             // 
@@ -190,7 +191,7 @@
             // 
             this.复制ToolStripMenuItem.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
-            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
             this.复制ToolStripMenuItem.Text = "复制";
             this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
             // 
@@ -392,6 +393,7 @@
             this.打开目录ToolStripMenuItem});
             this.DownLoadListMenu.Name = "DownLoadListMenu";
             this.DownLoadListMenu.Size = new System.Drawing.Size(125, 48);
+            this.DownLoadListMenu.Opening += new System.ComponentModel.CancelEventHandler(this.DownLoadListMenu_Opening);
             // 
             // 状态操作ToolStripMenuItem
             // 
@@ -400,34 +402,34 @@
             this.开始ToolStripMenuItem,
             this.终止ToolStripMenuItem});
             this.状态操作ToolStripMenuItem.Name = "状态操作ToolStripMenuItem";
-            this.状态操作ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.状态操作ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.状态操作ToolStripMenuItem.Text = "状态操作";
             // 
             // 暂停ToolStripMenuItem
             // 
             this.暂停ToolStripMenuItem.Name = "暂停ToolStripMenuItem";
-            this.暂停ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.暂停ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.暂停ToolStripMenuItem.Text = "暂停";
             this.暂停ToolStripMenuItem.Click += new System.EventHandler(this.暂停ToolStripMenuItem_Click);
             // 
             // 开始ToolStripMenuItem
             // 
             this.开始ToolStripMenuItem.Name = "开始ToolStripMenuItem";
-            this.开始ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.开始ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.开始ToolStripMenuItem.Text = "继续";
             this.开始ToolStripMenuItem.Click += new System.EventHandler(this.开始ToolStripMenuItem_Click);
             // 
             // 终止ToolStripMenuItem
             // 
             this.终止ToolStripMenuItem.Name = "终止ToolStripMenuItem";
-            this.终止ToolStripMenuItem.Size = new System.Drawing.Size(100, 22);
+            this.终止ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.终止ToolStripMenuItem.Text = "终止";
             this.终止ToolStripMenuItem.Click += new System.EventHandler(this.终止ToolStripMenuItem_Click);
             // 
             // 打开目录ToolStripMenuItem
             // 
             this.打开目录ToolStripMenuItem.Name = "打开目录ToolStripMenuItem";
-            this.打开目录ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.打开目录ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.打开目录ToolStripMenuItem.Text = "打开目录";
             this.打开目录ToolStripMenuItem.Click += new System.EventHandler(this.打开目录ToolStripMenuItem_Click);
             // 
@@ -441,6 +443,15 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "设置";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(250, 224);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(125, 12);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "暂无。。有时间就写上";
             // 
             // UpdateDownLoadList_Timer
             // 
@@ -458,15 +469,6 @@
             this.Test_Button.UseVisualStyleBackColor = true;
             this.Test_Button.Visible = false;
             this.Test_Button.Click += new System.EventHandler(this.Test_Button_Click);
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(250, 224);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(125, 12);
-            this.label2.TabIndex = 0;
-            this.label2.Text = "暂无。。有时间就写上";
             // 
             // Main
             // 

@@ -89,16 +89,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\Operation\CopyInfo.cs" />
     <Compile Include="Data\ListItem.cs" />
     <Compile Include="Data\DiskFileInfo.cs" />
-    <Compile Include="Data\ShareKey.cs" />
+    <Compile Include="Data\Operation\Delete.cs" />
+    <Compile Include="Data\Operation\ShareKey.cs" />
     <Compile Include="Data\SpaceInfo.cs" />
-    <Compile Include="Data\SuperFile.cs" />
+    <Compile Include="Data\Operation\SuperFile.cs" />
     <Compile Include="Forms\AddDownload.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\AddDownload.Designer.cs">
       <DependentUpon>AddDownload.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\InPutCode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\InPutCode.Designer.cs">
+      <DependentUpon>InPutCode.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\Login.cs">
       <SubType>Form</SubType>
@@ -125,6 +133,7 @@
       <DependentUpon>Video.cs</DependentUpon>
     </Compile>
     <Compile Include="HttpTool\HttpTask.cs" />
+    <Compile Include="Managers\CopyManager.cs" />
     <Compile Include="Managers\TaskManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -137,6 +146,9 @@
     <Compile Include="Util\ShowCommands.cs" />
     <EmbeddedResource Include="Forms\AddDownload.resx">
       <DependentUpon>AddDownload.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\InPutCode.resx">
+      <DependentUpon>InPutCode.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Login.resx">
       <DependentUpon>Login.cs</DependentUpon>

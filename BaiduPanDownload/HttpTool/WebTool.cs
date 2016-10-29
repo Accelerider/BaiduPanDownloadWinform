@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Text;
+using System.Windows.Forms;
 
 namespace BaiduPanDownload.HttpTool
 {
@@ -143,6 +144,47 @@ namespace BaiduPanDownload.HttpTool
             }
 
             return res;
+        }
+
+        /// <summary>
+        /// 下载文件
+        /// </summary>
+        /// <param name="Url">下载链接</param>
+        /// <param name="FileName">保存路径</param>
+        /// <param name="From">Range定义的头</param>
+        /// <param name="To">Range定义的尾</param>
+        public static bool DownloadFile(string Url,string FileName,int From,int To)
+        {
+            try
+            {
+                HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Url);
+                httpWebRequest.Timeout = 5000;
+                httpWebRequest.AddRange(From, To);
+                HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+                long contentLength = httpWebResponse.ContentLength;
+                using (Stream responseStream = httpWebResponse.GetResponseStream())
+                {
+                    using (Stream stream = new FileStream(FileName, FileMode.Create))
+                    {
+                        long num = 0L;
+                        byte[] array = new byte[1024];
+                        int i = responseStream.Read(array, 0, array.Length);
+                        while (i > 0)
+                        {
+                            num = (long)i + num;
+                            Application.DoEvents();
+                            stream.Write(array, 0, i);
+                            i = responseStream.Read(array, 0, array.Length);
+                            Application.DoEvents();
+                        }
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }
