@@ -327,15 +327,29 @@ namespace BaiduPanDownload.Forms
                 MessageBox.Show("出现了未知错误! 请刷新重试");
                 return;
             }
-            var info = Fileinfo[FilelistView.SelectedItems[0].Text];
-            if (info.isdir == 1)
+            CopyFilesAddress();
+        }
+
+        private void CopyFilesAddress()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (ListViewItem item in FilelistView.SelectedItems)
             {
-                MessageBox.Show("不支持下载文件夹...");
-                return;
+                var info = Fileinfo[item.Text];
+                if (info.isdir == 1)
+                {
+                    Console.WriteLine("暂时不支持复制文件夹...");
+                }
+                else
+                {
+                    sb.AppendLine($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}");
+                }
             }
             try
             {
-                Clipboard.SetDataObject($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}");
+
+                Clipboard.SetDataObject(sb.ToString());
+                Console.WriteLine(sb.ToString());
             }
             catch (Exception ex)
             {
