@@ -15,7 +15,7 @@ namespace BaiduPanDownload.HttpTool
 {
     class HttpUpload :HttpTask
     {
-        public string UploadPath { get; set; } = "/apps/wp2pcs";
+        public string UploadPath { get; set; }
 
         ArrayList TaskList = new ArrayList();
         WebClient Client = new WebClient();
@@ -35,7 +35,7 @@ namespace BaiduPanDownload.HttpTool
                 return;
             }
             Running = true;
-            UploadPath += $"/{FileName}";
+            UploadPath += @"/{FileName}";
             State = "正在尝试秒传";
             if(RapidUpload(FilePath, FileName, UploadPath))
             {
@@ -58,7 +58,7 @@ namespace BaiduPanDownload.HttpTool
             }else
             {
                 int num = 0;
-                foreach (string file in FileOperation.SplitFile(FilePath, $"{Program.config.TempPath}\\{FileName}", 20 * 1024 * 1024))
+                foreach (string file in FileOperation.SplitFile(FilePath, @"{Program.config.TempPath}\\{FileName}", 20 * 1024 * 1024))
                 {
                     TaskList.Add(new UploadTask
                     {
@@ -81,11 +81,11 @@ namespace BaiduPanDownload.HttpTool
             if (TaskList.Count == 1)
             {
                 //一次性上传
-                Client.UploadFileAsync(new Uri($"https://pcs.baidu.com/rest/2.0/pcs/file?method=upload&path={UploadPath}&access_token={Program.config.Access_Token}"), FilePath);
+                Client.UploadFileAsync(new Uri(@"https://pcs.baidu.com/rest/2.0/pcs/file?method=upload&path={UploadPath}&access_token={Program.config.Access_Token}"), FilePath);
             }else
             {
                 //分片上传
-                Client.UploadFileAsync(new Uri($"https://pcs.baidu.com/rest/2.0/pcs/file?method=upload&access_token={Program.config.Access_Token}&type=tmpfile"), Task.FilePath);
+                Client.UploadFileAsync(new Uri(@"https://pcs.baidu.com/rest/2.0/pcs/file?method=upload&access_token={Program.config.Access_Token}&type=tmpfile"), Task.FilePath);
             }
         }
 
@@ -143,7 +143,7 @@ namespace BaiduPanDownload.HttpTool
                     }
                     IDictionary<string, string> parameters = new Dictionary<string, string>();
                     parameters.Add("param", JsonConvert.SerializeObject(new SuperFile { block_list = md5List }));
-                    WebTool.CreatePostHttpResponse($"https://pcs.baidu.com/rest/2.0/file?method=createsuperfile&path={UploadPath}&access_token={Program.config.Access_Token}", parameters, null, null, Encoding.UTF8, null);
+                    WebTool.CreatePostHttpResponse(@"https://pcs.baidu.com/rest/2.0/file?method=createsuperfile&path={UploadPath}&access_token={Program.config.Access_Token}", parameters, null, null, Encoding.UTF8, null);
                 }
                 State = "上传完成";
                 SetComplete();
@@ -174,7 +174,7 @@ namespace BaiduPanDownload.HttpTool
                 return false;
             }
             var MD5 = HashTool.HashFile(FilePath);
-            var SliceMD5 = HashTool.HashFile($"{Program.config.TempPath}\\{FileName},Tmp");
+            var SliceMD5 = HashTool.HashFile(@"{Program.config.TempPath}\\{FileName},Tmp");
             var CRC32 = HashTool.GetFileCRC32(FilePath);
             return RapidUpload(MD5,SliceMD5,CRC32,info.Length,UploadPath);
         }
@@ -190,7 +190,7 @@ namespace BaiduPanDownload.HttpTool
         /// <returns>是否成功</returns>
         public static bool RapidUpload(string MD5,string SliceMD5,string CRC32,long Length,string UploadPath)
         {
-            if (WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=rapidupload&access_token={Program.config.Access_Token}&content-length={Length}&content-md5={MD5}&slice-md5={SliceMD5}&path={UploadPath}").Contains("ERROR"))
+            if (WebTool.GetHtml(@"https://pcs.baidu.com/rest/2.0/pcs/file?method=rapidupload&access_token={Program.config.Access_Token}&content-length={Length}&content-md5={MD5}&slice-md5={SliceMD5}&path={UploadPath}").Contains("ERROR"))
             {
                 return false;
             }
@@ -204,7 +204,7 @@ namespace BaiduPanDownload.HttpTool
             try
             {
                 byte[] bytes = new byte[256*1024];
-                using (FileStream targetFileStream = new FileStream($"{Program.config.TempPath}\\{FileName},Tmp", FileMode.Create))
+                using (FileStream targetFileStream = new FileStream(@"{Program.config.TempPath}\\{FileName},Tmp", FileMode.Create))
                 {
                     using (FileStream fileStream = new FileStream(FilePath, FileMode.Open, FileAccess.Read))
                     {
@@ -280,6 +280,6 @@ namespace BaiduPanDownload.HttpTool
         public long To { get; set; }
         public string MD5 { get; set; }
         public string FilePath { get; set; }
-        string TempFile { get; set; } = string.Empty;
+        string TempFile { get; set; }
     }
 }
