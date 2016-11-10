@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Web;
 
 namespace BaiduPanDownload.Forms
 {
@@ -342,7 +343,7 @@ namespace BaiduPanDownload.Forms
                 }
                 else
                 {
-                    sb.AppendLine($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}");
+                    sb.AppendLine($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path=" + HttpUtility.UrlEncode($"{info.path}"));
                 }
             }
             try
