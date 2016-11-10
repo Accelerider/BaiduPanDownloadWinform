@@ -11,7 +11,7 @@ using System.Windows.Forms;
 
 namespace BaiduPanDownload.HttpTool
 {
-    class HttpDownload : HttpTask
+    public class HttpDownload : HttpTask
     {
         public string DownLoadUrl { get; set; }
         
@@ -19,10 +19,15 @@ namespace BaiduPanDownload.HttpTool
 
         public bool Stop { get; set; }
 
+        public long From { get; set; } = 0L;
+        public long To { get; set; } = 0L;
 
         long contentLength = 0L;
         long downloadLength = 0L;
         long speed = 0;
+
+        public delegate void onTaskCompleted();
+        public event onTaskCompleted TaskCompletedEvent;
 
         DownloadThread[] threads;
 
@@ -37,12 +42,21 @@ namespace BaiduPanDownload.HttpTool
             Running = true;
             try
             {
-                State = "下载中";
+                State = TaskState.下载中;
                 HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(DownLoadUrl);
                 HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
                 contentLength = httpWebResponse.ContentLength;
                 threads = new DownloadThread[ThreadNum];
+                if (From == To)
+                {
+                    From = 0;
+                    To = contentLength;
+                }else
+                {
+                    contentLength = To - From;
+                }
                 long q = contentLength / ThreadNum;
+                //需要修改
                 new Thread(SpeedStatistics).Start();
                 for(int i=0; i<ThreadNum; i++)
                 {
@@ -52,8 +66,8 @@ namespace BaiduPanDownload.HttpTool
                         {
                             Url = DownLoadUrl,
                             FileName = FilePath + "\\" + FileName + "._tmp" + i.ToString(),
-                            From = q * i,
-                            To = contentLength,
+                            From = From+(q * i),
+                            To = To,
                             download = this
                         };
                         break;
@@ -63,17 +77,32 @@ namespace BaiduPanDownload.HttpTool
                     {
                         Url = DownLoadUrl,
                         FileName = FilePath + "\\" + FileName + "._tmp" + i.ToString(),
-                        From = q * i,
-                        To = (q * (i + 1)) - 1,
-                        download=this
+                        From =From+(q * i),
+                        To = From + (q * (i + 1) - 1),
+                        download =this
                     };
                 }
             }
             catch(Exception ex)
             {
-                State = "下载失败";
+                State = TaskState.任务失败;
                 SetComplete();
-                MessageBox.Show($"下载失败! 错误: {ex.Message} \r\n如果以上错误为404的话 那就是文件名非法\r\n百度云的API并不允许下载有特殊字符的文件名");
+                if(ex is WebException)
+                {
+                    //404 ERROR
+                    if (ex.Message.Contains("404"))
+                    {
+                        MessageBox.Show("下载失败! 文件名有非法字符,请使用云管家重命名后再下载");
+                        return;
+                    }
+                    //403 ERROR
+                    if (ex.Message.Contains("403"))
+                    {
+                        MessageBox.Show("下载失败! 百度抽风了,你可以换个账号或者等几天再下载\r\nPS:一般来说等一天就好");
+                        return;
+                    }
+                }
+                MessageBox.Show($"下载失败! 错误: {ex.Message}");
             }
         }
 
@@ -90,6 +119,10 @@ namespace BaiduPanDownload.HttpTool
                     speed = downloadLength - back;
                     back = downloadLength;
                 }
+                if (State == TaskState.已停止)
+                {
+                    break;
+                }
                 if (Complete >= threads.Length)
                 {
                     if (Stop)
@@ -101,11 +134,12 @@ namespace BaiduPanDownload.HttpTool
                     {
                         files[i] = threads[i].FileName;
                     }
-                    State = "拼接文件中";
+                    State = TaskState.合并文件中;
                     FileOperation.CombineFiles(files, FilePath + "\\" + FileName);
                     Running = false;
                     TaskComplete = true;
-                    State="下载完成";
+                    State=TaskState.下载完成;
+                    TaskCompletedEvent?.Invoke();
                     break;
                 }
                 Thread.Sleep(1000);
@@ -118,7 +152,7 @@ namespace BaiduPanDownload.HttpTool
             {
                 return;
             }
-            State = "暂停中";
+            State = TaskState.暂停中;
             foreach (DownloadThread thread in threads)
             {
                 thread.Paste();
@@ -134,7 +168,7 @@ namespace BaiduPanDownload.HttpTool
                 return;
             }
 
-            State = "下载中";
+            State = TaskState.下载中;
             foreach (DownloadThread thread in threads)
             {
                 thread.Continue();
@@ -149,13 +183,12 @@ namespace BaiduPanDownload.HttpTool
             {
                 return;
             }
-            State = "已停止";
-            SetComplete();
+            State =TaskState.已停止;
             foreach (DownloadThread thread in threads)
             {
                 thread.Stop();
             }
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
             for (int i = 0; i < threads.Length; i++)
             {
                 try
@@ -179,6 +212,10 @@ namespace BaiduPanDownload.HttpTool
 
         public override long GetSpeed()
         {
+            if (State == TaskState.下载完成)
+            {
+                return 0L;
+            }
             return speed;
         }
 
@@ -192,6 +229,10 @@ namespace BaiduPanDownload.HttpTool
 
         public override float GetPercentage()
         {
+            if (State == TaskState.下载完成)
+            {
+                return 100F;
+            }
             return ((float)downloadLength / (float)contentLength * 100f);
         }
 
@@ -200,10 +241,6 @@ namespace BaiduPanDownload.HttpTool
             this.Complete++;
         }
 
-        public override string GetState()
-        {
-            throw new NotImplementedException();
-        }
 
         public override int GetType()
         {
@@ -237,16 +274,18 @@ class DownloadThread
     bool isPaste = false;
     bool isStop = false;
 
+    Thread DFThread;
     public DownloadThread()
     {
-        new Thread(DownloadFile).Start();
+        DFThread=new Thread(DownloadFile);
+        DFThread.Start();
     }
-
+    HttpWebRequest httpWebRequest;
     void DownloadFile()
     {
         try
         {
-            HttpWebRequest httpWebRequest = (HttpWebRequest)WebRequest.Create(Url);
+            httpWebRequest = (HttpWebRequest)WebRequest.Create(Url);
             httpWebRequest.Timeout = 5000;
             httpWebRequest.AddRange(From,To);
             HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
@@ -285,11 +324,20 @@ class DownloadThread
                 }
             }
         }
+        catch (ThreadAbortException)
+        {
+            return;
+        }
         catch(Exception ex)
         {
+            if(ex.Message.Contains("请求被取消") || ex.Message.Contains("内部"))
+            {
+                return;
+            }
             errorNum++;
             if (errorNum > 5)
             {
+                MessageBox.Show($"下载失败: {ex.Message}");
                 return;
             }
             new Thread(DownloadFile).Start();
@@ -309,5 +357,7 @@ class DownloadThread
     public void Stop()
     {
         isStop = true;
+        DFThread.Abort();
+        httpWebRequest.Abort();
     }
 }

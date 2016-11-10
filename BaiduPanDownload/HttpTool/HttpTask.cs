@@ -1,11 +1,12 @@
-﻿using System;
+﻿using BaiduPanDownload.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace BaiduPanDownload.HttpTool
 {
-    abstract class HttpTask
+    public abstract class HttpTask
     {
         public int ID { get; set; }
 
@@ -13,7 +14,7 @@ namespace BaiduPanDownload.HttpTool
 
         public string FilePath { get; set; }
 
-        public string State { get; protected set; } = "等待中";
+        public TaskState State { get; protected set; } = TaskState.等待中;
 
         public bool Running { get; protected set; } = false;
 
@@ -26,8 +27,6 @@ namespace BaiduPanDownload.HttpTool
         public abstract void ContinueTask();
 
         public abstract float GetPercentage();
-
-        public abstract string GetState();
 
         public abstract new int GetType();
 

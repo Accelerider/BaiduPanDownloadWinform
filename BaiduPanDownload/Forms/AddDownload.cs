@@ -107,12 +107,12 @@ namespace BaiduPanDownload.Forms
                     {
                         Directory.CreateDirectory(downloadPath);
                     }
-                    main.AddDownloadFile(dfi, downloadPath, dfi.getName());
+                    main.AddDownloadFile(dfi, downloadPath, dfi.getName(),getSizeMB(dfi.size)>Program.config.SuperDownloadSize);
                 }
                 this.Close();
                 return;
             }
-            main.AddDownloadFile(info, textBox1.Text, info.getName());
+            main.AddDownloadFile(info, textBox1.Text, info.getName(), getSizeMB(info.size) > Program.config.SuperDownloadSize);
             this.Close();
         }
     }

@@ -48,8 +48,6 @@ namespace BaiduPanDownload.Forms
             Program.config.save();
             MessageBox.Show("保存完成");
             //ShellExecute(IntPtr.Zero, "open", "rundll32.exe", " InetCpl.cpl,ClearMyTracksByProcess 255", "", ShowCommands.SW_HIDE);
-            
-            MessageBox.Show(webBrowser1.Document.Cookie);
             webBrowser1.Dispose();
             this.Close();
         }

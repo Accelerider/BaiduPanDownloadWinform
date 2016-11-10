@@ -36,14 +36,14 @@ namespace BaiduPanDownload.HttpTool
             }
             Running = true;
             UploadPath += $"/{FileName}";
-            State = "正在尝试秒传";
+            State =TaskState.正在尝试秒传;
             if(RapidUpload(FilePath, FileName, UploadPath))
             {
-                State = "秒传完成";
+                State = TaskState.上传完成;
                 SetComplete();
                 return;
             }
-            State = "上传中";
+            State =TaskState.上传中;
             //如果小于20M
             if (new FileInfo(FilePath).Length <= (20 * 1024 * 1024))
             {
@@ -145,7 +145,7 @@ namespace BaiduPanDownload.HttpTool
                     parameters.Add("param", JsonConvert.SerializeObject(new SuperFile { block_list = md5List }));
                     WebTool.CreatePostHttpResponse($"https://pcs.baidu.com/rest/2.0/file?method=createsuperfile&path={UploadPath}&access_token={Program.config.Access_Token}", parameters, null, null, Encoding.UTF8, null);
                 }
-                State = "上传完成";
+                State = TaskState.上传完成;
                 SetComplete();
             }
             else
@@ -226,11 +226,6 @@ namespace BaiduPanDownload.HttpTool
             return Speed;
         }
 
-        public override string GetState()
-        {
-            return State;
-        }
-
         public override int GetType()
         {
             return 1;
@@ -254,7 +249,7 @@ namespace BaiduPanDownload.HttpTool
                 }
             }
             SetComplete();
-            State = "已停止";
+            State =TaskState.已停止;
         }
 
         public override void PasteTask()

@@ -64,7 +64,7 @@ namespace BaiduPanDownload.Forms
             try
             {
                 Path_Lab.Text = "当前路径:" + path.ToString().Replace("apps", "我的应用数据");
-                var jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path={path}"));
+                var jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path="+ Uri.EscapeDataString($"{path.ToString()}")));
                 FilelistView.BeginUpdate();
                 FilelistView.Items.Clear();
                 Fileinfo.Clear();
@@ -185,6 +185,7 @@ namespace BaiduPanDownload.Forms
 
         private void Help_Link_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            /*
             MessageBox.Show(
                 "吧要下载的文件放到您百度网盘的 [/我的应用数据/wp2pcs/] 目录,即可在本程序访问"+Environment.NewLine+
                 "双击文件为下载;双击目录为打开目录" +Environment.NewLine+
@@ -193,6 +194,15 @@ namespace BaiduPanDownload.Forms
                 "新增加上传文件!直接把文件拖入即可,不支持文件夹!!!"
                 ,"帮助"
                 );
+                */
+            try
+            {
+                System.Diagnostics.Process.Start("http://www.mrs4s.top/2016/10/06/%E3%80%90c%E5%B0%8F%E5%B7%A5%E5%85%B7%E3%80%91%E7%99%BE%E5%BA%A6%E7%BD%91%E7%9B%98%E4%B8%8D%E9%99%90%E9%80%9F%E4%B8%8B%E8%BD%BD%E5%B7%A5%E5%85%B7");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("调用浏览器失败! " + ex.Message);
+            }
         }
 
         private void Blog_Link_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
@@ -223,8 +233,27 @@ namespace BaiduPanDownload.Forms
             DownloadListView.View = View.Details;
             new Thread(updateFileList).Start(HomePath + Path);
             new Thread(Upgraded).Start();
+            LoadConfig();
         }
-
+        void LoadConfig()
+        {
+            if (Program.config.ThreadNum > 16)
+            {
+                Program.config.ThreadNum = 8;
+                Program.config.save();
+                MessageBox.Show("下载线程设置不正确,已重置!");
+            }
+            if (Program.config.NetSpeed > 100)
+            {
+                Program.config.NetSpeed = 30;
+                Program.config.save();
+                MessageBox.Show("暂时不兼容这么快的网速");
+            }
+            ComboBox.Text = Program.config.ThreadNum.ToString();
+            DownloadPath_TextBox.Text = Program.config.DownloadPath;
+            NetSpeed_TextBox.Text = Program.config.NetSpeed.ToString();
+            SuperDLSize_Textbox.Text = Program.config.SuperDownloadSize.ToString();
+        }
         /// <summary>
         /// 检查更新
         /// </summary>
@@ -233,8 +262,8 @@ namespace BaiduPanDownload.Forms
             try
             {
                 JObject job = JObject.Parse(WebTool.GetHtml("http://www.mrs4s.top/api/update.json"));
-                //版本4
-                if ((int)job["Build"] > 4)
+                //版本6
+                if ((int)job["Build"] > 6)
                 {
 
                     DialogResult dr = MessageBox.Show((string)job["Message"] + "\r\n\r\n是否更新?", "发现更新", MessageBoxButtons.OKCancel);
@@ -254,13 +283,19 @@ namespace BaiduPanDownload.Forms
             catch { }
         }
 
-        public void AddDownloadFile(DiskFileInfo info,string DownloadPath,string FileName)
+        public void AddDownloadFile(DiskFileInfo info,string DownloadPath,string FileName,bool SuperDownload)
         {
             if (DownloadTaskInfo.ContainsKey(FileName))
             {
                 MessageBox.Show("警告:任务已存在");
             }
-            TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}", DownloadPath, FileName,8);
+            if (SuperDownload)
+            {
+                TaskManager.GetTastManager.CreateSuperDownload(info, DownloadPath, FileName, Program.config.NetSpeed/10);
+            }else
+            {
+                TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path="+ Uri.EscapeDataString($"{info.path}"), DownloadPath, FileName,Program.config.ThreadNum);
+            }
         }
 
         int getDownloadTaskNum()
@@ -342,7 +377,7 @@ namespace BaiduPanDownload.Forms
                 }
                 else
                 {
-                    sb.AppendLine($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}");
+                    sb.AppendLine($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path="+ Uri.EscapeDataString($"{info.path}"));
                 }
             }
             try
@@ -370,13 +405,13 @@ namespace BaiduPanDownload.Forms
                     item.SubItems.Add(Task.FilePath);
                     item.SubItems.Add((getSizeMB((long)Task.GetSpeed()) < 1 ? (Task.GetSpeed() / 1024) + "K/s" : getSizeMB((long)Task.GetSpeed()) + "M/s"));
                     item.SubItems.Add(Task.GetPercentage()+"%");
-                    item.SubItems.Add(Task.State);
+                    item.SubItems.Add(Task.State.ToString());
                     DownloadListView.Items.Add(item);
                     continue;
                 }
                 DownloadListView.Items[Task.ID].SubItems[3].Text= (getSizeMB((long)Task.GetSpeed()) < 1 ? (Task.GetSpeed() / 1024) + "K/s" : getSizeMB((long)Task.GetSpeed()) + "M/s");
                 DownloadListView.Items[Task.ID].SubItems[4].Text = Task.GetPercentage() + "%";
-                DownloadListView.Items[Task.ID].SubItems[5].Text = Task.State;
+                DownloadListView.Items[Task.ID].SubItems[5].Text = Task.State.ToString();
             }
             DownloadListView.EndUpdate();
             return;
@@ -402,7 +437,8 @@ namespace BaiduPanDownload.Forms
 
         private void 打开目录ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (!TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).State.Contains("完成") && TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).GetType()!=1)
+            //要改
+            if (!TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).State.ToString().Contains("完成") && TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).GetType()!=1)
             {
                 MessageBox.Show("任务未完成!");
                 return;
@@ -506,7 +542,7 @@ namespace BaiduPanDownload.Forms
 
         private void 分享文件ToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            if (!TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).State.Contains("完成") && TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).GetType() != 1)
+            if (!TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).State.ToString().Contains("完成") && TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).GetType() != 1)
             {
                 MessageBox.Show("任务未完成!");
                 return;
@@ -548,6 +584,68 @@ namespace BaiduPanDownload.Forms
                 CopyManager.GetCopyManager.Copy(HomePath + Path);
                 new Thread(updateFileList).Start(HomePath + Path);
                 return;
+            }
+        }
+
+        private void DownloadListView_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (DownloadListView.SelectedItems.Count < 1)
+            {
+                return;
+            }
+            var Task=TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text));
+            if(Task is SuperDownload)
+            {
+                new DownloadInfo()
+                {
+                    info = Task as SuperDownload
+                }.Show();
+            }
+        }
+
+        private void Save_Button_Click(object sender, EventArgs e)
+        {
+            if(ComboBox.Text==string.Empty || DownloadPath_TextBox.Text==string.Empty || NetSpeed_TextBox.Text==string.Empty || SuperDLSize_Textbox.Text == string.Empty)
+            {
+                MessageBox.Show("保存失败: 参数错误");
+                return;
+            }
+            if (int.Parse(NetSpeed_TextBox.Text) > 100)
+            {
+                MessageBox.Show("暂时不兼容这么快的网速");
+                return;
+            }
+            Program.config.ThreadNum=int.Parse(ComboBox.Text);
+            Program.config.DownloadPath = DownloadPath_TextBox.Text;
+            Program.config.NetSpeed=int.Parse(NetSpeed_TextBox.Text);
+            Program.config.SuperDownloadSize=int.Parse(SuperDLSize_Textbox.Text);
+            Program.config.save();
+            MessageBox.Show("保存完成");
+        }
+
+        private void NetSpeed_TextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if(!(Char.IsNumber(e.KeyChar)) && e.KeyChar != 8)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void SuperDLSize_Textbox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!(Char.IsNumber(e.KeyChar)) && e.KeyChar != 8)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+            folderBrowserDialog.Description = "请选择下载目录";
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                DownloadPath_TextBox.Text = folderBrowserDialog.SelectedPath;
             }
         }
     }

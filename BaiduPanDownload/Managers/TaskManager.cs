@@ -1,4 +1,6 @@
-﻿using BaiduPanDownload.HttpTool;
+﻿using BaiduPanDownload.Data;
+using BaiduPanDownload.HttpTool;
+using BaiduPanDownload.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +33,7 @@ namespace BaiduPanDownload.Managers
             {
                 foreach(var task in Tasks)
                 {
-                    if (!task.Value.Running && !task.Value.TaskComplete && !task.Value.Paste)
+                    if (task.Value.State==TaskState.等待中)
                     {
                         task.Value.Start();
                         break;
@@ -51,7 +53,7 @@ namespace BaiduPanDownload.Managers
             int ret=0;
             foreach(var task in Tasks)
             {
-                if (task.Value.Running)
+                if (task.Value.State==TaskState.下载中 || task.Value.State==TaskState.加速下载中)
                 {
                     ret++;
                 }
@@ -81,6 +83,21 @@ namespace BaiduPanDownload.Managers
             };
             Tasks.Add(id, task);
             return (HttpDownload)task;
+        }
+
+        public SuperDownload CreateSuperDownload(DiskFileInfo info,string DownloadPath,string FileName,int SubTaskNum)
+        {
+            int id = Tasks.Count;
+            HttpTask task = new SuperDownload
+            {
+                ID=id,
+                Info=info,
+                FilePath=DownloadPath,
+                FileName=FileName,
+                SubTaskNum=SubTaskNum
+            };
+            Tasks.Add(id, task);
+            return task as SuperDownload;
         }
 
 

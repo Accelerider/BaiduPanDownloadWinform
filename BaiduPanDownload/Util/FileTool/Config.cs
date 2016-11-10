@@ -16,6 +16,8 @@ namespace BaiduPanDownload.Util
         public string TempPath { get; } = AppDomain.CurrentDomain.BaseDirectory + "Temp";
         public int ThreadNum { get; set; } = 8;
         public int TaskNum { get; set; } = 3;
+        public int NetSpeed { get; set; } = 30;
+        public int SuperDownloadSize { get; set; } = 100;
         public JObject DownloadList { get; set; } = new JObject();
 
         public void save()
