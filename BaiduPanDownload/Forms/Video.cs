@@ -21,9 +21,9 @@ namespace BaiduPanDownload.Forms
 
         private void Video_Load(object sender, EventArgs e)
         {
-            axWindowsMediaPlayer1.URL = $"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}";
+            axWindowsMediaPlayer1.URL = @"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}";
             axWindowsMediaPlayer1.Ctlcontrols.play();
-            Text = $"正在播放:  {info.getName()}  (双击全屏)";
+            Text = @"正在播放:  {info.getName()}  (双击全屏)";
         }
     }
 }

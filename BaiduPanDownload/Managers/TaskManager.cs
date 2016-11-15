@@ -9,7 +9,7 @@ namespace BaiduPanDownload.Managers
 {
     class TaskManager
     {
-        public static TaskManager GetTastManager { get; } = new TaskManager();
+        public static TaskManager GetTastManager = new TaskManager();
 
         Dictionary<int, HttpTask> Tasks = new Dictionary<int, HttpTask>();
 

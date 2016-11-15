@@ -15,7 +15,7 @@ namespace BaiduPanDownload.HttpTool
     {
         public string DownLoadUrl { get; set; }
         
-        public int ThreadNum { get; set; } = 1;
+        public int ThreadNum = 1;
 
         public bool Stop { get; set; }
 
@@ -73,7 +73,7 @@ namespace BaiduPanDownload.HttpTool
             {
                 State = "下载失败";
                 SetComplete();
-                MessageBox.Show($"下载失败! 错误: {ex.Message} \r\n如果以上错误为404的话 那就是文件名非法\r\n百度云的API并不允许下载有特殊字符的文件名");
+                MessageBox.Show(@"下载失败! 错误: {ex.Message} \r\n如果以上错误为404的话 那就是文件名非法\r\n百度云的API并不允许下载有特殊字符的文件名");
             }
         }
 

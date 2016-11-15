@@ -12,7 +12,7 @@ namespace BaiduPanDownload.Managers
 {
     class CopyManager
     {
-        public static CopyManager GetCopyManager { get; } = new CopyManager();
+        public static CopyManager GetCopyManager = new CopyManager();
 
         ArrayList CopyList = new ArrayList();
 
@@ -38,7 +38,7 @@ namespace BaiduPanDownload.Managers
             }
             IDictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("param", JsonConvert.SerializeObject(info));
-            WebTool.CreatePostHttpResponse($"https://pcs.baidu.com/rest/2.0/pcs/file?method=copy&access_token={Program.config.Access_Token}",parameters,null,null,Encoding.UTF8,null);
+            WebTool.CreatePostHttpResponse(@"https://pcs.baidu.com/rest/2.0/pcs/file?method=copy&access_token={Program.config.Access_Token}",parameters,null,null,Encoding.UTF8,null);
         }
 
     }

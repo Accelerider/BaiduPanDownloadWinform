@@ -64,7 +64,7 @@ namespace BaiduPanDownload.Forms
             try
             {
                 Path_Lab.Text = "当前路径:" + path.ToString().Replace("apps", "我的应用数据");
-                var jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path={path}"));
+                var jobj = JObject.Parse(WebTool.GetHtml(@"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path={path}"));
                 FilelistView.BeginUpdate();
                 FilelistView.Items.Clear();
                 Fileinfo.Clear();
@@ -260,7 +260,7 @@ namespace BaiduPanDownload.Forms
             {
                 MessageBox.Show("警告:任务已存在");
             }
-            TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}", DownloadPath, FileName,8);
+            TaskManager.GetTastManager.CreateDownloadTask(@"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}", DownloadPath, FileName,8);
         }
 
         int getDownloadTaskNum()
@@ -342,7 +342,7 @@ namespace BaiduPanDownload.Forms
                 }
                 else
                 {
-                    sb.AppendLine($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}");
+                    sb.AppendLine(@"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path={info.path}");
                 }
             }
             try

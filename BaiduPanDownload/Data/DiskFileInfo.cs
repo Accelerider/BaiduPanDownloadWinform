@@ -40,7 +40,7 @@ namespace BaiduPanDownload.Data
                 return null;
             }
             ArrayList FileList = new ArrayList();
-            JObject jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path={path}"));
+            JObject jobj = JObject.Parse(WebTool.GetHtml(@"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path={path}"));
             foreach (JObject job in jobj["list"])
             {
                 DiskFileInfo fileinfo = JsonConvert.DeserializeObject<BaiduPanDownload.Data.DiskFileInfo>(job.ToString());

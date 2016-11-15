@@ -8,7 +8,7 @@ namespace BaiduPanDownload.Data
 {
     class CopyInfo
     {
-        public ArrayList list { get; private set; } = new ArrayList();
+        public ArrayList list = new ArrayList();
 
         public void Add(string from,string to)
         {

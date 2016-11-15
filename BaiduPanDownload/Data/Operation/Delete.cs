@@ -8,7 +8,7 @@ namespace BaiduPanDownload.Data.Operation
 {
     class Delete
     {
-        ArrayList list { get; } = new ArrayList();
+        ArrayList list= new ArrayList();
 
         public void Add(string Path)
         {
