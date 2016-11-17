@@ -158,22 +158,37 @@ namespace BaiduPanDownload.HttpTool
 
         public override float GetPercentage()
         {
-            float Percentage = 0F;
-            foreach (var SubTask in SubTasks)
+            try
             {
-                Percentage += (SubTask.Value.GetPercentage() / SubTaskNum);
+                float Percentage = 0F;
+                foreach (var SubTask in SubTasks)
+                {
+                    Percentage += (SubTask.Value.GetPercentage() / SubTaskNum);
+                }
+                return Percentage;
             }
-            return Percentage;
+            catch
+            {
+                return 0L;
+            }
         }
 
         public override long GetSpeed()
         {
-            long Speed = 0L;
-            foreach (var SubTask in SubTasks)
+            try
             {
-                Speed += SubTask.Value.GetSpeed();
+                long Speed = 0L;
+                foreach (var SubTask in SubTasks)
+                {
+                    Speed += SubTask.Value.GetSpeed();
+                }
+                return Speed;
             }
-            return Speed;
+            catch
+            {
+                return 0L;
+            }
+
         }
 
         public override int GetType()

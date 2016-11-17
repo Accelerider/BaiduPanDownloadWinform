@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
+//吃枣药丸
+//再不重写就完了
 namespace BaiduPanDownload.HttpTool
 {
     public class HttpDownload : HttpTask
@@ -24,7 +26,6 @@ namespace BaiduPanDownload.HttpTool
 
         long contentLength = 0L;
         long downloadLength = 0L;
-        long speed = 0;
 
         public delegate void onTaskCompleted();
         public event onTaskCompleted TaskCompletedEvent;
@@ -56,8 +57,6 @@ namespace BaiduPanDownload.HttpTool
                     contentLength = To - From;
                 }
                 long q = contentLength / ThreadNum;
-                //需要修改
-                new Thread(SpeedStatistics).Start();
                 for(int i=0; i<ThreadNum; i++)
                 {
                     if (i ==( ThreadNum - 1))
@@ -65,22 +64,21 @@ namespace BaiduPanDownload.HttpTool
                         threads[i] = new DownloadThread
                         {
                             Url = DownLoadUrl,
-                            FileName = FilePath + "\\" + FileName + "._tmp" + i.ToString(),
+                            DownloadPath = FilePath + "\\" + FileName + "._tmp" + i.ToString(),
                             From = From+(q * i),
-                            To = To,
-                            download = this
+                            To = To
                         };
+                        threads[i].DownloadCompletedEvent += HttpDownload_DownloadCompletedEvent;
                         break;
                     }
-                    
                     threads[i] = new DownloadThread
                     {
                         Url = DownLoadUrl,
-                        FileName = FilePath + "\\" + FileName + "._tmp" + i.ToString(),
+                        DownloadPath = FilePath + "\\" + FileName + "._tmp" + i.ToString(),
                         From =From+(q * i),
                         To = From + (q * (i + 1) - 1),
-                        download =this
                     };
+                    threads[i].DownloadCompletedEvent+= HttpDownload_DownloadCompletedEvent;
                 }
             }
             catch(Exception ex)
@@ -106,75 +104,53 @@ namespace BaiduPanDownload.HttpTool
             }
         }
 
-        void SpeedStatistics()
+        private void HttpDownload_DownloadCompletedEvent(DownloadThread thread)
         {
-            long back=0;
-            while (true)
+            lock (this)
             {
-                if (back == 0)
+                bool flag = false;
+                foreach (DownloadThread thr in threads)
                 {
-                    back = downloadLength;
-                }else
-                {
-                    speed = downloadLength - back;
-                    back = downloadLength;
-                }
-                if (State == TaskState.已停止)
-                {
-                    break;
-                }
-                if (Complete >= threads.Length)
-                {
-                    if (Stop)
+                    if (thr.Equals(thread))
                     {
-                        break;
+                        continue;
                     }
-                    string[] files = new string[threads.Length];
-                    for (int i = 0; i < threads.Length; i++)
+                    if (!thr.Completed)
                     {
-                        files[i] = threads[i].FileName;
+                        flag = true;
                     }
-                    State = TaskState.合并文件中;
-                    FileOperation.CombineFiles(files, FilePath + "\\" + FileName);
-                    Running = false;
-                    TaskComplete = true;
-                    State=TaskState.下载完成;
-                    TaskCompletedEvent?.Invoke();
-                    break;
                 }
-                Thread.Sleep(1000);
+                if (flag)
+                {
+                    return;
+                }
+                if (Stop)
+                {
+                    return;
+                }
+                string[] files = new string[threads.Length];
+                for (int i = 0; i < threads.Length; i++)
+                {
+                    files[i] = threads[i].DownloadPath;
+                }
+                State = TaskState.合并文件中;
+                FileOperation.CombineFiles(files, FilePath + "\\" + FileName);
+                Running = false;
+                TaskComplete = true;
+                State = TaskState.下载完成;
+                TaskCompletedEvent?.Invoke();
             }
         }
 
+
         public void PasteDownload()
         {
-            if (DownloadComplete())
-            {
-                return;
-            }
-            State = TaskState.暂停中;
-            foreach (DownloadThread thread in threads)
-            {
-                thread.Paste();
-            }
-            Running = false;
-            Paste = true;
+            MessageBox.Show("暂时无法暂停,请等待正式版的断点续传!");
         }
 
         public override void ContinueTask()
         {
-            if (DownloadComplete())
-            {
-                return;
-            }
-
-            State = TaskState.下载中;
-            foreach (DownloadThread thread in threads)
-            {
-                thread.Continue();
-            }
-            Running = true;
-            Paste = false;
+            return;
         }
 
         public void StopDownload()
@@ -187,16 +163,6 @@ namespace BaiduPanDownload.HttpTool
             foreach (DownloadThread thread in threads)
             {
                 thread.Stop();
-            }
-            Thread.Sleep(2000);
-            for (int i = 0; i < threads.Length; i++)
-            {
-                try
-                {
-                    File.Delete(threads[i].FileName);
-                }
-                catch { }
-                
             }
             
         }
@@ -212,11 +178,24 @@ namespace BaiduPanDownload.HttpTool
 
         public override long GetSpeed()
         {
-            if (State == TaskState.下载完成)
+            try
+            {
+                if (State == TaskState.下载完成 || threads == null)
+                {
+                    return 0L;
+                }
+                long speed = 0L;
+                foreach (DownloadThread task in threads)
+                {
+                    speed += task.Speed;
+                }
+                return speed;
+            }
+            catch
             {
                 return 0L;
             }
-            return speed;
+
         }
 
         public void addDownloadLength(long length)
@@ -229,17 +208,30 @@ namespace BaiduPanDownload.HttpTool
 
         public override float GetPercentage()
         {
-            if (State == TaskState.下载完成)
+            try
             {
-                return 100F;
+                if (State == TaskState.下载完成)
+                {
+                    return 100F;
+                }
+                if (threads == null)
+                {
+                    return 0F;
+                }
+                float Percentage = 0F;
+                foreach (DownloadThread task in threads)
+                {
+                    Percentage += task.GetPercentage() / ThreadNum;
+                }
+                return Percentage;
             }
-            return ((float)downloadLength / (float)contentLength * 100f);
+            catch
+            {
+                return 0F;
+            }
+
         }
 
-        public void addComplete()
-        {
-            this.Complete++;
-        }
 
 
         public override int GetType()
@@ -261,103 +253,4 @@ namespace BaiduPanDownload.HttpTool
     }
 
 
-}
-class DownloadThread
-{
-    public string Url { get; set; }
-    public string FileName { get; set; }
-    public long From { get; set; }
-    public long To { get; set; }
-    public HttpDownload download { get; set; }
-
-    int errorNum = 0;
-    bool isPaste = false;
-    bool isStop = false;
-
-    Thread DFThread;
-    public DownloadThread()
-    {
-        DFThread=new Thread(DownloadFile);
-        DFThread.Start();
-    }
-    HttpWebRequest httpWebRequest;
-    void DownloadFile()
-    {
-        try
-        {
-            httpWebRequest = (HttpWebRequest)WebRequest.Create(Url);
-            httpWebRequest.Timeout = 5000;
-            httpWebRequest.AddRange(From,To);
-            HttpWebResponse httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
-            
-            long contentLength = httpWebResponse.ContentLength;
-            using (Stream responseStream = httpWebResponse.GetResponseStream())
-            {
-                using (Stream stream = new FileStream(FileName, FileMode.Create))
-                {
-                    long num = 0L;
-                    byte[] array = new byte[1024];
-                    int i = responseStream.Read(array, 0, array.Length);
-                    while (i > 0)
-                    {
-                        num = (long)i + num;
-                        Application.DoEvents();
-                        stream.Write(array, 0, i);
-                        if (isStop)
-                        {
-                            break;
-                        }
-                        //史上最sb的暂停方案
-                        while (isPaste)
-                        {
-                            if (isStop)
-                            {
-                                break;
-                            }
-                            Thread.Sleep(1000);
-                        }
-                        i = responseStream.Read(array, 0, array.Length);
-                        download.addDownloadLength(i);
-                        Application.DoEvents();
-                    }
-                    download.addComplete();
-                }
-            }
-        }
-        catch (ThreadAbortException)
-        {
-            return;
-        }
-        catch(Exception ex)
-        {
-            if(ex.Message.Contains("请求被取消") || ex.Message.Contains("内部"))
-            {
-                return;
-            }
-            errorNum++;
-            if (errorNum > 5)
-            {
-                MessageBox.Show($"下载失败: {ex.Message}");
-                return;
-            }
-            new Thread(DownloadFile).Start();
-        }
-    }
-
-    public void Paste()
-    {
-        isPaste = true;
-    }
-
-    public void Continue()
-    {
-        isPaste = false;
-    }
-
-    public void Stop()
-    {
-        isStop = true;
-        DFThread.Abort();
-        httpWebRequest.Abort();
-    }
 }

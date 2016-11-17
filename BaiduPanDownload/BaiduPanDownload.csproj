@@ -139,6 +139,7 @@
     <Compile Include="Forms\Video.Designer.cs">
       <DependentUpon>Video.cs</DependentUpon>
     </Compile>
+    <Compile Include="HttpTool\DownloadThread.cs" />
     <Compile Include="HttpTool\HttpTask.cs" />
     <Compile Include="HttpTool\SuperDownload.cs" />
     <Compile Include="Managers\CopyManager.cs" />
