@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Test.Download
+namespace BaiduPanDownload.HttpTool.Download
 {
     class DownloadThread
     {
+        #region
         public int ID { get; set; }
         /// <summary>
         /// 下载链接
@@ -28,6 +29,12 @@ namespace Test.Download
         /// 下载信息
         /// </summary>
         public DownloadInfo Info { get; set; }
+        #endregion
+
+        #region 事件
+        public delegate void onThreadCompletedEvent();
+        public event onThreadCompletedEvent ThreadCompletedEvent;
+        #endregion
 
         public DownloadThread()
         {
@@ -42,11 +49,12 @@ namespace Test.Download
         {
             try
             {
+                Thread.Sleep(1000);
                 if (Block.Completed)
                 {
+                    ThreadCompletedEvent?.Invoke();
                     return;
                 }
-                Thread.Sleep(1000);
                 Request = WebRequest.Create(DownloadUrl) as HttpWebRequest;
                 Request.AddRange(Block.From,Block.To);
                 HttpWebResponse Response = Request.GetResponse() as HttpWebResponse;
@@ -72,6 +80,7 @@ namespace Test.Download
                             i = ResponseStream.Read(Array, 0, Array.Length);
                         }
                         Block.Completed = true;
+                        ThreadCompletedEvent?.Invoke();
                     }
                 }
             }
@@ -93,6 +102,10 @@ namespace Test.Download
         /// </summary>
         public void Stop()
         {
+            if (Block.Completed)
+            {
+                return;
+            }
             WorkThread.Abort();
             Request?.Abort();
         }

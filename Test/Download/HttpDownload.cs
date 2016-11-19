@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Test.Download
@@ -25,6 +26,9 @@ namespace Test.Download
         /// </summary>
         public int ThreadNum { get; set; }
 
+
+        DownloadThread[] Threads;
+        DownloadInfo Info;
         public void Start()
         {
             try
@@ -36,11 +40,11 @@ namespace Test.Download
                     DownloadInfo info = new DownloadInfo
                     {
                         ContentLength=Response.ContentLength,
-                        BlockLength=Response.ContentLength/ThreadNum
+                        BlockLength=Response.ContentLength/ThreadNum,
                     };
                     info.init(DownloadPath + ".dcj");
                 }
-                DownloadInfo Info= JsonConvert.DeserializeObject<DownloadInfo>(File.ReadAllText(DownloadPath + ".dcj"));
+                Info= JsonConvert.DeserializeObject<DownloadInfo>(File.ReadAllText(DownloadPath + ".dcj"));
                 if (!File.Exists(DownloadPath))
                 {
                     FileStream Stream = new FileStream(DownloadPath, FileMode.CreateNew);
@@ -48,10 +52,11 @@ namespace Test.Download
                     Stream.Close();
                 }
                 Console.WriteLine(Info.DownloadBlockList.Count);
+                Threads = new DownloadThread[Info.DownloadBlockList.Count];
                 for(int i = 0; i < Info.DownloadBlockList.Count; i++)
                 {
                     DownloadBlock Block= JsonConvert.DeserializeObject<DownloadBlock>(Info.DownloadBlockList[i].ToString());
-                    new DownloadThread
+                    Threads[i]=new DownloadThread
                     {
                         ID = i,
                         DownloadUrl = Url,
@@ -59,12 +64,49 @@ namespace Test.Download
                         Block = Block,
                         Info = Info
                     };
-
                 }
+                new Thread(a).Start();
             }
             catch(Exception ex)
             {
                 Console.WriteLine("出现错误: "+ex.ToString());
+            }
+        }
+        public void a()
+        {
+            long temp = 0L;
+            while (true)
+            {
+                Thread.Sleep(1000);
+                if (temp == 0)
+                {
+                    temp = Info.CompletedLength;
+                }
+                else
+                {
+                    long Speed = Info.CompletedLength - temp;
+                    temp = Info.CompletedLength;
+                    Console.WriteLine("速度: " + Speed / 1024 / 1024+"MB/S\r\n进度: "+((float)Info.CompletedLength/(float)Info.ContentLength)*100);
+                    if (Speed == 0)
+                    {
+                        Info.Save(DownloadPath + ".dcj");
+                        return;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// 保存并结束
+        /// </summary>
+        public void StopAndSave()
+        {
+            if (Threads != null)
+            {
+                foreach(var Thread in Threads)
+                {
+                    Thread.Stop();
+                }
+                Info.Save(DownloadPath + ".dcj");
             }
         }
     }

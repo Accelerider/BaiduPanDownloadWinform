@@ -1,8 +1,13 @@
 ﻿using BaiduPanDownload.Data;
 using BaiduPanDownload.HttpTool;
+using BaiduPanDownload.HttpTool.Download;
 using BaiduPanDownload.Util;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Timers;
@@ -13,137 +18,139 @@ namespace BaiduPanDownload.Managers
     {
         public static TaskManager GetTastManager { get; } = new TaskManager();
 
-        Dictionary<int, HttpTask> Tasks = new Dictionary<int, HttpTask>();
-
+        Timer TaskManagerTimer = new Timer(1000)
+        {
+            AutoReset = true,
+            Enabled = true
+        };
 
         public TaskManager()
         {
-            Timer TaskManagerTimer = new Timer(1000)
-            {
-                AutoReset = true,
-                Enabled = true
-            };
             TaskManagerTimer.Elapsed += TaskManagerTimer_Elapsed;
             TaskManagerTimer.Start();
         }
 
+        Dictionary<int, HttpDownload> TaskList = new Dictionary<int, HttpDownload>();
+
+        #region 事件
+        public delegate void onTaskReloadEvent();
+        /// <summary>
+        /// 重载任务列表事件
+        /// </summary>
+        public event onTaskReloadEvent ReloadEvnet;
+        #endregion
+
+
         private void TaskManagerTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (GetDownloadingTaskNum() < Program.config.TaskNum)
+            if (GetDwonloadingTaskNum() < Program.config.TaskNum)
             {
-                foreach(var task in Tasks)
+                var WaitTask = TaskList.Where(v=> (!v.Value.Completed && !v.Value.Downloading && !v.Value.Stoped));
+                foreach(var task in WaitTask)
                 {
-                    if (task.Value.State==TaskState.等待中)
-                    {
-                        task.Value.Start();
-                        break;
-                    }
+                    task.Value.Start();
+                    return;
                 }
             }
         }
 
-
-
         /// <summary>
-        /// 获取正在执行的任务数量
+        /// 创建一个下载任务
         /// </summary>
-        /// <returns></returns>
-        public int GetDownloadingTaskNum()
+        /// <param name="DownloadUrl"></param>
+        /// <param name="DownloadPath"></param>
+        /// <param name="ThreadNum"></param>
+        public void CreateDownloadTask(string DownloadUrl,string DownloadPath)
         {
-            int ret=0;
-            foreach(var task in Tasks)
+            if (File.Exists(DownloadPath))
             {
-                if (task.Value.State==TaskState.下载中 || task.Value.State==TaskState.加速下载中)
-                {
-                    ret++;
-                }
+                return;
             }
-            return ret;
+            var Task=new HttpDownload
+            {
+                ID=TaskList.Count,
+                Url=DownloadUrl,
+                DownloadPath=DownloadPath,
+                ThreadNum=Program.config.NetSpeed
+            };
+            Task.CreateDataFile();
+            Program.config.SetDownloadInfo(DownloadPath+".dcj",false);
+            TaskList.Add(TaskList.Count,Task);
         }
-
 
         /// <summary>
-        /// 创建下载任务
+        /// 结束所有任务并保存
         /// </summary>
-        /// <param name="DownLoadUrl">下载链接</param>
-        /// <param name="DownLoadPath">下载路径</param>
-        /// <param name="FileName">保存文件名</param>
-        /// <param name="ThreadNum">下载线程数</param>
-        /// <returns></returns>
-        public HttpDownload CreateDownloadTask(string DownLoadUrl,string DownLoadPath,string FileName,int ThreadNum)
+        public void StopAndSave()
         {
-            int id = Tasks.Count;
-            HttpTask task = new HttpDownload
+            TaskManagerTimer.Stop();
+            var DownloadingTask = TaskList.Where(v => v.Value.Downloading);
+            foreach (var task in DownloadingTask)
             {
-                ID=id,
-                DownLoadUrl=DownLoadUrl,
-                FilePath=DownLoadPath,
-                FileName=FileName,
-                ThreadNum=ThreadNum,
-            };
-            Tasks.Add(id, task);
-            return (HttpDownload)task;
+                task.Value.StopAndSave();
+            }
         }
-
-        public SuperDownload CreateSuperDownload(DiskFileInfo info,string DownloadPath,string FileName,int SubTaskNum)
-        {
-            int id = Tasks.Count;
-            HttpTask task = new SuperDownload
-            {
-                ID=id,
-                Info=info,
-                FilePath=DownloadPath,
-                FileName=FileName,
-                SubTaskNum=SubTaskNum
-            };
-            Tasks.Add(id, task);
-            return task as SuperDownload;
-        }
-
 
         /// <summary>
-        /// 创建上载任务
+        /// 获取下载中的任务数
         /// </summary>
-        /// <param name="FileName">保存文件名</param>
-        /// <param name="FilePath">上载文件路径</param>
-        /// <param name="UploadPath">保存目录</param>
         /// <returns></returns>
-        public HttpUpload CreateUploadTask(string FileName,string FilePath,string UploadPath)
+        public int GetDwonloadingTaskNum()
         {
-            int id = Tasks.Count;
-            HttpTask task = new HttpUpload
-            {
-                ID = id,
-                FileName=FileName,
-                FilePath=FilePath,
-                UploadPath=UploadPath
-            };
-            Tasks.Add(id, task);
-            return (HttpUpload)task;
+            return TaskList.Where(v => v.Value.Downloading).Count();
         }
 
+        /// <summary>
+        /// 重载所有存放在配置文件中的任务
+        /// </summary>
+        public void ReloadTask()
+        {
+            TaskList.Clear();
+            ReloadEvnet?.Invoke();
+            int id = 0;
+            foreach (var T in Program.config.DownloadList)
+            {
+                DownloadItem Item = T is JObject ? JsonConvert.DeserializeObject<DownloadItem>(T.ToString()) : T as DownloadItem;
+                if (!File.Exists(Item.FilePath))
+                {
+                    continue;
+                }
+                var Info = JsonConvert.DeserializeObject<DownloadInfo>(File.ReadAllText(Item.FilePath));
+                TaskList.Add(id, new HttpDownload
+                {
+                    ID = id,
+                    Url = Info.DownloadUrl,
+                    DownloadPath = Item.FilePath.Replace(".dcj", string.Empty)
+                });
+                id++;
+            }
+        }
         /// <summary>
         /// 获取任务列表
         /// </summary>
         /// <returns></returns>
-        public HttpTask[] GetTasks()
+        public ArrayList GetTaskList()
         {
-            HttpTask[] ret = new HttpTask[Tasks.Count];
-            foreach(var task in Tasks)
+            ArrayList Temp = new ArrayList();
+            foreach(var Task in TaskList)
             {
-                ret[task.Key] = task.Value;
+                Temp.Add(Task.Value);
             }
-            return ret;
+            return Temp;
         }
 
         /// <summary>
-        /// 通过ID来获取任务
+        /// 通过ID获取任务
         /// </summary>
-        /// <param name="id">任务ID</param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        public HttpTask GetTaskByID(int id)
+        public HttpDownload GetTaskByID(int id)
         {
-            return Tasks[id];
+            if (!TaskList.ContainsKey(id))
+            {
+                return null;
+            }
+            return TaskList[id];
         }
     }
 }

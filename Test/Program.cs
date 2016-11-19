@@ -11,8 +11,8 @@ namespace Test
 {
     class Program
     {
-        static readonly string Url = @"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token=xx&path=%2Fapps%2Fwp2pcs%2F%E5%8A%A8%E7%94%BB%2F%5B%E3%82%A2%E3%83%8B%E3%83%A1%20BD%5D%20%E5%A4%A9%E4%BD%93%E3%81%AE%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89%20%E7%AC%AC01%E8%A9%B1%E3%80%8C%E5%86%86%E7%9B%A4%E3%81%AE%E8%A1%97%E3%80%8D(1920%C3%971080%20HEVC%2010bit%20FLAC%20FLAC%20softSub(chi%20eng)%20chap).mkv";
-        static readonly string Path = @"C:\Users\18448\Desktop\Test\Test.mkv";
+        static readonly string Url = @"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token=23.26d5ebed36b39ecb83ccc369532d5db4.2592000.1481987849.2872528644-1641135&path=%2Fapps%2Fwp2pcs%2FR0409%20%E6%B8%B8%E6%88%8F%E6%9C%AC%E4%BD%93.rar";
+        static readonly string Path = @"C:\Users\18448\Desktop\Test\Test.rar";
 
         static void Main(string[] args)
         {
@@ -20,12 +20,14 @@ namespace Test
             Console.WriteLine("测试下载程序");
             Console.WriteLine("下载文件为: "+ Url);
             Console.WriteLine("下载目录为: "+ Path);
-            new HttpDownload
+            var t=new HttpDownload
             {
                 Url=Url,
                 DownloadPath=Path,
                 ThreadNum=120
-            }.Start();
+            };
+            t.Start();
+            Thread.Sleep(9999999);
         }
 
     }

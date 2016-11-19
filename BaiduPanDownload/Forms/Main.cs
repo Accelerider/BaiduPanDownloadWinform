@@ -1,5 +1,6 @@
 ﻿using BaiduPanDownload.Data;
 using BaiduPanDownload.HttpTool;
+using BaiduPanDownload.HttpTool.Download;
 using BaiduPanDownload.Managers;
 using BaiduPanDownload.Util;
 using Newtonsoft.Json;
@@ -28,7 +29,6 @@ namespace BaiduPanDownload.Forms
         ArrayList DownloadList = new ArrayList();
 
         Dictionary<string, DiskFileInfo> Fileinfo = new Dictionary<string, DiskFileInfo>();
-        Dictionary<string, HttpDownload> DownloadTaskInfo = new Dictionary<string, HttpDownload>();
 
         public Main()
         {
@@ -127,14 +127,6 @@ namespace BaiduPanDownload.Forms
                     new Thread(this.updateFileList).Start(HomePath + Path);
                     return;
                 }
-                if (info.getSuffix() == "mp4" || info.getSuffix()=="mkv")
-                {
-                    new Video
-                    {
-                        info=info
-                    }.Show();
-                    return;
-                }
                 new AddDownload(this, info).ShowDialog();
             }
         }
@@ -224,6 +216,7 @@ namespace BaiduPanDownload.Forms
             {
                 Directory.CreateDirectory(Program.config.TempPath);
             }
+            LoadConfig();
             if (Program.config.Access_Token == "null" || Program.config.Access_Token == string.Empty)
             {
                 return;
@@ -233,26 +226,18 @@ namespace BaiduPanDownload.Forms
             DownloadListView.View = View.Details;
             new Thread(updateFileList).Start(HomePath + Path);
             new Thread(Upgraded).Start();
-            LoadConfig();
         }
         void LoadConfig()
         {
-            if (Program.config.ThreadNum > 16)
-            {
-                Program.config.ThreadNum = 8;
-                Program.config.save();
-                MessageBox.Show("下载线程设置不正确,已重置!");
-            }
-            if (Program.config.NetSpeed > 100)
+            if (Program.config.NetSpeed > 120)
             {
                 Program.config.NetSpeed = 30;
                 Program.config.save();
                 MessageBox.Show("暂时不兼容这么快的网速");
             }
-            ComboBox.Text = Program.config.ThreadNum.ToString();
             DownloadPath_TextBox.Text = Program.config.DownloadPath;
             NetSpeed_TextBox.Text = Program.config.NetSpeed.ToString();
-            SuperDLSize_Textbox.Text = Program.config.SuperDownloadSize.ToString();
+            TaskManager.GetTastManager.ReloadTask();
         }
         /// <summary>
         /// 检查更新
@@ -262,10 +247,9 @@ namespace BaiduPanDownload.Forms
             try
             {
                 JObject job = JObject.Parse(WebTool.GetHtml("http://www.mrs4s.top/api/update.json"));
-                //版本6
-                if ((int)job["Build"] > 6)
+                //版本7
+                if ((int)job["Build"] > 7)
                 {
-
                     DialogResult dr = MessageBox.Show((string)job["Message"] + "\r\n\r\n是否更新?", "发现更新", MessageBoxButtons.OKCancel);
                     if (dr == DialogResult.OK)
                     {
@@ -283,19 +267,9 @@ namespace BaiduPanDownload.Forms
             catch { }
         }
 
-        public void AddDownloadFile(DiskFileInfo info,string DownloadPath,string FileName,bool SuperDownload)
+        public void AddDownloadFile(DiskFileInfo info,string DownloadPath,string FileName)
         {
-            if (DownloadTaskInfo.ContainsKey(FileName))
-            {
-                MessageBox.Show("警告:任务已存在");
-            }
-            if (SuperDownload)
-            {
-                TaskManager.GetTastManager.CreateSuperDownload(info, DownloadPath, FileName, Program.config.NetSpeed/10);
-            }else
-            {
-                TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path="+ Uri.EscapeDataString($"{info.path}"), DownloadPath, FileName,Program.config.ThreadNum);
-            }
+            TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path=" + Uri.EscapeDataString(info.path),DownloadPath+"\\"+FileName);
         }
 
         int getDownloadTaskNum()
@@ -395,23 +369,23 @@ namespace BaiduPanDownload.Forms
         private void UpdateDownLoadList_Timer_Tick(object sender, EventArgs e)
         {
             DownloadListView.BeginUpdate();
-            foreach(HttpTask Task in TaskManager.GetTastManager.GetTasks())
+            foreach (HttpDownload Task in TaskManager.GetTastManager.GetTaskList())
             {
-                if (DownloadListView.Items.Count==Task.ID)
+                if (DownloadListView.Items.Count == Task.ID)
                 {
                     ListViewItem item = new ListViewItem();
                     item.Text = Task.ID.ToString();
-                    item.SubItems.Add(Task.FileName);
-                    item.SubItems.Add(Task.FilePath);
-                    item.SubItems.Add((getSizeMB((long)Task.GetSpeed()) < 1 ? (Task.GetSpeed() / 1024) + "K/s" : getSizeMB((long)Task.GetSpeed()) + "M/s"));
-                    item.SubItems.Add(Task.GetPercentage()+"%");
-                    item.SubItems.Add(Task.State.ToString());
+                    item.SubItems.Add(Task.DownloadPath.Split('\\')[Task.DownloadPath.Split('\\').Length-1]);
+                    item.SubItems.Add(Task.DownloadPath);
+                    item.SubItems.Add((getSizeMB((long)Task.Speed) < 1 ? (Task.Speed / 1024) + "K/s" : getSizeMB((long)Task.Speed) + "M/s"));
+                    item.SubItems.Add(Task.Percentage + "%");
+                    item.SubItems.Add(Task.Downloading?"下载中":"停止中");
                     DownloadListView.Items.Add(item);
                     continue;
                 }
-                DownloadListView.Items[Task.ID].SubItems[3].Text= (getSizeMB((long)Task.GetSpeed()) < 1 ? (Task.GetSpeed() / 1024) + "K/s" : getSizeMB((long)Task.GetSpeed()) + "M/s");
-                DownloadListView.Items[Task.ID].SubItems[4].Text = Task.GetPercentage() + "%";
-                DownloadListView.Items[Task.ID].SubItems[5].Text = Task.State.ToString();
+                DownloadListView.Items[Task.ID].SubItems[3].Text = (getSizeMB((long)Task.Speed) < 1 ? (Task.Speed / 1024) + "K/s" : getSizeMB((long)Task.Speed) + "M/s");
+                DownloadListView.Items[Task.ID].SubItems[4].Text = Task.Percentage + "%";
+                DownloadListView.Items[Task.ID].SubItems[5].Text = Task.Downloading ? "下载中" : "停止中";
             }
             DownloadListView.EndUpdate();
             return;
@@ -420,13 +394,9 @@ namespace BaiduPanDownload.Forms
 
         private void 暂停ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).PasteTask();
+            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).StopAndSave();
         }
 
-        private void 开始ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).ContinueTask();
-        }
 
         void OpenFolderAndSelectFile(string fileFullName)
         {
@@ -437,47 +407,29 @@ namespace BaiduPanDownload.Forms
 
         private void 打开目录ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //要改
-            if (!TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).State.ToString().Contains("完成") && TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).GetType()!=1)
-            {
-                MessageBox.Show("任务未完成!");
-                return;
-            }
-            var FilePath = TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).FilePath + "\\" + TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).FileName;
+
+            var FilePath = TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).DownloadPath;
             if (!File.Exists(FilePath))
             {
                 MessageBox.Show("文件不存在,似乎已经被删除了");
                 return;
             }
             OpenFolderAndSelectFile(FilePath);
+            
         }
 
         private void 终止ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).StopTask();
+            //TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).StopTask();
         }
 
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (TaskManager.GetTastManager.GetDownloadingTaskNum() > 0)
-            {
-                DialogResult dr = MessageBox.Show("你还有任务未完成,退出程序意味着放弃所有下载(其实是我懒没写断点续传),是否继续?", "提示", MessageBoxButtons.OKCancel);
-                if (dr == DialogResult.OK)
-                {
-                    MessageBox.Show("即将开始清理下载产生的临时数据,请等待");
-                    foreach(HttpTask Task in TaskManager.GetTastManager.GetTasks())
-                    {
-                        Task.StopTask();
-                    }
-                }else
-                {
-                    e.Cancel = true;
-                }
-            }
+            TaskManager.GetTastManager.StopAndSave();
         }
         private void Test_Button_Click(object sender, EventArgs e)
         {
-            new Video().Show();
+            
         }
 
         private void FilelistView_DragEnter(object sender, DragEventArgs e)
@@ -492,11 +444,7 @@ namespace BaiduPanDownload.Forms
 
         private void FilelistView_DragDrop(object sender, DragEventArgs e)
         {
-            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            foreach(string file in files)
-            {
-                TaskManager.GetTastManager.CreateUploadTask(file.Split('\\')[file.Split('\\').Length-1], file, HomePath + Path).Start();
-            }
+            MessageBox.Show("当前版本暂时不支持上传");
         }
 
         private void 粘贴ToolStripMenuItem_Click(object sender, EventArgs e)
@@ -542,17 +490,6 @@ namespace BaiduPanDownload.Forms
 
         private void 分享文件ToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            if (!TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).State.ToString().Contains("完成") && TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).GetType() != 1)
-            {
-                MessageBox.Show("任务未完成!");
-                return;
-            }
-            var FilePath = TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).FilePath + "\\" + TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).FileName;
-            if (!File.Exists(FilePath))
-            {
-                MessageBox.Show("文件不存在,似乎已经被删除了");
-                return;
-            }
 
         }
 
@@ -594,31 +531,22 @@ namespace BaiduPanDownload.Forms
                 return;
             }
             var Task=TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text));
-            if(Task is SuperDownload)
-            {
-                new DownloadInfo()
-                {
-                    info = Task as SuperDownload
-                }.Show();
-            }
         }
 
         private void Save_Button_Click(object sender, EventArgs e)
         {
-            if(ComboBox.Text==string.Empty || DownloadPath_TextBox.Text==string.Empty || NetSpeed_TextBox.Text==string.Empty || SuperDLSize_Textbox.Text == string.Empty)
+            if(DownloadPath_TextBox.Text==string.Empty || NetSpeed_TextBox.Text==string.Empty)
             {
                 MessageBox.Show("保存失败: 参数错误");
                 return;
             }
-            if (int.Parse(NetSpeed_TextBox.Text) > 100)
+            if (int.Parse(NetSpeed_TextBox.Text) > 120)
             {
                 MessageBox.Show("暂时不兼容这么快的网速");
                 return;
             }
-            Program.config.ThreadNum=int.Parse(ComboBox.Text);
             Program.config.DownloadPath = DownloadPath_TextBox.Text;
             Program.config.NetSpeed=int.Parse(NetSpeed_TextBox.Text);
-            Program.config.SuperDownloadSize=int.Parse(SuperDLSize_Textbox.Text);
             Program.config.save();
             MessageBox.Show("保存完成");
         }
@@ -647,6 +575,16 @@ namespace BaiduPanDownload.Forms
             {
                 DownloadPath_TextBox.Text = folderBrowserDialog.SelectedPath;
             }
+        }
+
+        private void 终止ToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            MessageBox.Show("当前版本无停止功能,请等待下个版本");
+        }
+
+        private void 继续ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).Start();
         }
     }
 }

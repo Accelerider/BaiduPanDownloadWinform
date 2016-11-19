@@ -31,7 +31,16 @@ namespace BaiduPanDownload
                 }.save();
                 MessageBox.Show("欢迎使用本工具,,因为你懂的原因。。请低调使用!");
             }
-            config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Config.json"));
+            try
+            {
+                config = JsonConvert.DeserializeObject<Config>(File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "Config.json"));
+            }
+            catch
+            {
+                MessageBox.Show("配置文件读取时出现意料之外的错误! 请删除程序目录下的Config.json重试!");
+                return;
+            }
+            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Main());

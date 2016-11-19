@@ -78,10 +78,6 @@ namespace BaiduPanDownload.Forms
         {
             this.button2.Enabled = false;
             this.button2.Text = "添加中...";
-            if (info.isdir == 1)
-            {
-                MessageBox.Show("即将添加文件夹下载,程序可能未响应一段时间!");
-            }
             AddDownloadButton();
         }
 
@@ -94,7 +90,16 @@ namespace BaiduPanDownload.Forms
             }
             if (!Directory.Exists(textBox1.Text))
             {
-                MessageBox.Show("下载文件夹不存在!");
+                MessageBox.Show("下载路径不存在!");
+                this.button2.Enabled = true;
+                this.button2.Text = "添加下载";
+                return;
+            }
+            if (info.size <= Program.config.NetSpeed)
+            {
+                MessageBox.Show("文件太小,无法下载!");
+                this.button2.Enabled = true;
+                this.button2.Text = "添加下载";
                 return;
             }
             if (info.isdir == 1)
@@ -107,12 +112,12 @@ namespace BaiduPanDownload.Forms
                     {
                         Directory.CreateDirectory(downloadPath);
                     }
-                    main.AddDownloadFile(dfi, downloadPath, dfi.getName(),getSizeMB(dfi.size)>Program.config.SuperDownloadSize);
+                    main.AddDownloadFile(dfi, downloadPath, dfi.getName());
                 }
                 this.Close();
                 return;
             }
-            main.AddDownloadFile(info, textBox1.Text, info.getName(), getSizeMB(info.size) > Program.config.SuperDownloadSize);
+            main.AddDownloadFile(info, textBox1.Text, info.getName());
             this.Close();
         }
     }

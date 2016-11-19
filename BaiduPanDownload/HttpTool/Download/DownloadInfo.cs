@@ -9,10 +9,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Test.Download
+namespace BaiduPanDownload.HttpTool.Download
 {
     public class DownloadInfo
     {
+        #region 参数
         /// <summary>
         /// 总长度
         /// </summary>
@@ -20,7 +21,15 @@ namespace Test.Download
         /// <summary>
         /// 下载完成长度
         /// </summary>
-        public long CompletedLength { get; set; } = 0L;
+        public long CompletedLength { get; set; }
+        /// <summary>
+        /// 是否完成
+        /// </summary>
+        public bool Completed { get; set; }
+        /// <summary>
+        /// 下载链接
+        /// </summary>
+        public string DownloadUrl { get; set; }
         /// <summary>
         /// 块大小
         /// </summary>
@@ -29,6 +38,7 @@ namespace Test.Download
         /// 下载分块
         /// </summary>
         public ArrayList DownloadBlockList { get;} = new ArrayList();
+        #endregion
 
         /// <summary>
         /// 初始化分块信息

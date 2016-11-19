@@ -104,12 +104,6 @@
     <Compile Include="Forms\AddDownload.Designer.cs">
       <DependentUpon>AddDownload.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\DownloadInfo.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\DownloadInfo.Designer.cs">
-      <DependentUpon>DownloadInfo.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\InPutCode.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -134,15 +128,9 @@
     <Compile Include="Forms\NewDir.Designer.cs">
       <DependentUpon>NewDir.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\Video.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Video.Designer.cs">
-      <DependentUpon>Video.cs</DependentUpon>
-    </Compile>
-    <Compile Include="HttpTool\DownloadThread.cs" />
-    <Compile Include="HttpTool\HttpTask.cs" />
-    <Compile Include="HttpTool\SuperDownload.cs" />
+    <Compile Include="HttpTool\Download\DownloadInfo.cs" />
+    <Compile Include="HttpTool\Download\DownloadThread.cs" />
+    <Compile Include="HttpTool\Download\HttpDownload.cs" />
     <Compile Include="Managers\CopyManager.cs" />
     <Compile Include="Managers\TaskManager.cs" />
     <Compile Include="Program.cs" />
@@ -150,17 +138,12 @@
     <Compile Include="Util\DiskAPI.cs" />
     <Compile Include="Util\FileTool\FileOperation.cs" />
     <Compile Include="Util\FileTool\Config.cs" />
-    <Compile Include="HttpTool\HttpDownload.cs" />
-    <Compile Include="HttpTool\HttpUpload.cs" />
     <Compile Include="HttpTool\WebTool.cs" />
     <Compile Include="Util\FileTool\HashTool.cs" />
     <Compile Include="Util\ShowCommands.cs" />
     <Compile Include="Util\TaskState.cs" />
     <EmbeddedResource Include="Forms\AddDownload.resx">
       <DependentUpon>AddDownload.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\DownloadInfo.resx">
-      <DependentUpon>DownloadInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\InPutCode.resx">
       <DependentUpon>InPutCode.cs</DependentUpon>
@@ -173,9 +156,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\NewDir.resx">
       <DependentUpon>NewDir.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Video.resx">
-      <DependentUpon>Video.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -220,25 +200,6 @@
       <ProductName>Windows Installer 4.5</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
-  </ItemGroup>
-  <ItemGroup>
-    <COMReference Include="AxWMPLib">
-      <Guid>{6BF52A50-394A-11D3-B153-00C04F79FAA6}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>aximp</WrapperTool>
-      <Isolated>False</Isolated>
-    </COMReference>
-    <COMReference Include="WMPLib">
-      <Guid>{6BF52A50-394A-11D3-B153-00C04F79FAA6}</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>False</Isolated>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
