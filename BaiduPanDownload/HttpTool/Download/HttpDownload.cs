@@ -186,12 +186,13 @@ namespace BaiduPanDownload.HttpTool.Download
         {
             if (Threads != null)
             {
-                foreach(var Thread in Threads)
+                Downloading = false;
+                Stoped = true;
+                CompletedThread = 0;
+                foreach (var Thread in Threads)
                 {
                     Thread.Stop();
                 }
-                Stoped = true;
-                Downloading = false;
                 Info.Save(DownloadPath + ".dcj");
             }
         }

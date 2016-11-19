@@ -44,7 +44,7 @@ namespace BaiduPanDownload.HttpTool.Download
 
         Thread WorkThread;
         HttpWebRequest Request;
-
+        HttpWebResponse Response;
         public void Start()
         {
             try
@@ -57,7 +57,7 @@ namespace BaiduPanDownload.HttpTool.Download
                 }
                 Request = WebRequest.Create(DownloadUrl) as HttpWebRequest;
                 Request.AddRange(Block.From,Block.To);
-                HttpWebResponse Response = Request.GetResponse() as HttpWebResponse;
+                Response = Request.GetResponse() as HttpWebResponse;
                 if (!File.Exists(Path))
                 {
                     Console.WriteLine("出现错误: 本地数据文件不存在");
@@ -106,8 +106,9 @@ namespace BaiduPanDownload.HttpTool.Download
             {
                 return;
             }
-            WorkThread.Abort();
             Request?.Abort();
+            Response?.Close();
+            WorkThread.Abort();
         }
     }
 }

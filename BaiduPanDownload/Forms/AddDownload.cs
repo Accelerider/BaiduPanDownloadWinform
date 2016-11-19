@@ -95,7 +95,7 @@ namespace BaiduPanDownload.Forms
                 this.button2.Text = "添加下载";
                 return;
             }
-            if (info.size <= Program.config.NetSpeed)
+            if (info.size <= Program.config.NetSpeed && info.isdir!=1)
             {
                 MessageBox.Show("文件太小,无法下载!");
                 this.button2.Enabled = true;

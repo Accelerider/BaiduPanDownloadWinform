@@ -40,9 +40,14 @@ namespace BaiduPanDownload.Managers
         public event onTaskReloadEvent ReloadEvnet;
         #endregion
 
+        bool Flag = false;
 
         private void TaskManagerTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            if (Flag)
+            {
+                return;
+            }
             if (GetDwonloadingTaskNum() < Program.config.TaskNum)
             {
                 var WaitTask = TaskList.Where(v=> (!v.Value.Completed && !v.Value.Downloading && !v.Value.Stoped));
@@ -66,6 +71,7 @@ namespace BaiduPanDownload.Managers
             {
                 return;
             }
+            Flag = true;
             var Task=new HttpDownload
             {
                 ID=TaskList.Count,
@@ -76,6 +82,7 @@ namespace BaiduPanDownload.Managers
             Task.CreateDataFile();
             Program.config.SetDownloadInfo(DownloadPath+".dcj",false);
             TaskList.Add(TaskList.Count,Task);
+            Flag = false;
         }
 
         /// <summary>

@@ -247,8 +247,8 @@ namespace BaiduPanDownload.Forms
             try
             {
                 JObject job = JObject.Parse(WebTool.GetHtml("http://www.mrs4s.top/api/update.json"));
-                //版本7
-                if ((int)job["Build"] > 7)
+                //版本8
+                if ((int)job["Build"] > 8)
                 {
                     DialogResult dr = MessageBox.Show((string)job["Message"] + "\r\n\r\n是否更新?", "发现更新", MessageBoxButtons.OKCancel);
                     if (dr == DialogResult.OK)
@@ -379,13 +379,13 @@ namespace BaiduPanDownload.Forms
                     item.SubItems.Add(Task.DownloadPath);
                     item.SubItems.Add((getSizeMB((long)Task.Speed) < 1 ? (Task.Speed / 1024) + "K/s" : getSizeMB((long)Task.Speed) + "M/s"));
                     item.SubItems.Add(Task.Percentage + "%");
-                    item.SubItems.Add(Task.Downloading?"下载中":"停止中");
+                    item.SubItems.Add(Task.Downloading?"下载中":Task.Completed?"下载完成":"暂停中");
                     DownloadListView.Items.Add(item);
                     continue;
                 }
                 DownloadListView.Items[Task.ID].SubItems[3].Text = (getSizeMB((long)Task.Speed) < 1 ? (Task.Speed / 1024) + "K/s" : getSizeMB((long)Task.Speed) + "M/s");
                 DownloadListView.Items[Task.ID].SubItems[4].Text = Task.Percentage + "%";
-                DownloadListView.Items[Task.ID].SubItems[5].Text = Task.Downloading ? "下载中" : "停止中";
+                DownloadListView.Items[Task.ID].SubItems[5].Text = Task.Downloading ? "下载中" : Task.Completed ? "下载完成" : "暂停中";
             }
             DownloadListView.EndUpdate();
             return;

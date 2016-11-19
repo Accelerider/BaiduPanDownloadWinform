@@ -38,6 +38,11 @@ namespace BaiduPanDownload.Forms
         private void button1_Click(object sender, EventArgs e)
         {
             Regex rg = new Regex("(?<=(" + "access_token=" + "))[.\\s\\S]*?(?=(" + "&" + "))", RegexOptions.Multiline | RegexOptions.Singleline);
+            if (webBrowser1.Url == null)
+            {
+                MessageBox.Show("尚未加载完成!");
+                return;
+            }
             string token = rg.Match(webBrowser1.Url.ToString()).Value;
             if (token == string.Empty)
             {
