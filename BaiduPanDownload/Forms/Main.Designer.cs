@@ -72,16 +72,16 @@
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.Save_Button = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
+            this.NetSpeed_TextBox = new System.Windows.Forms.TextBox();
+            this.button4 = new System.Windows.Forms.Button();
+            this.DownloadPath_TextBox = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.UpdateDownLoadList_Timer = new System.Windows.Forms.Timer(this.components);
             this.Test_Button = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.DownloadPath_TextBox = new System.Windows.Forms.TextBox();
-            this.button4 = new System.Windows.Forms.Button();
-            this.NetSpeed_TextBox = new System.Windows.Forms.TextBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.Save_Button = new System.Windows.Forms.Button();
-            this.label7 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.InfoMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -492,88 +492,6 @@
             this.label11.TabIndex = 1;
             this.label11.Text = "说明";
             // 
-            // UpdateDownLoadList_Timer
-            // 
-            this.UpdateDownLoadList_Timer.Enabled = true;
-            this.UpdateDownLoadList_Timer.Interval = 1000;
-            this.UpdateDownLoadList_Timer.Tick += new System.EventHandler(this.UpdateDownLoadList_Timer_Tick);
-            // 
-            // Test_Button
-            // 
-            this.Test_Button.Location = new System.Drawing.Point(305, 523);
-            this.Test_Button.Name = "Test_Button";
-            this.Test_Button.Size = new System.Drawing.Size(75, 23);
-            this.Test_Button.TabIndex = 12;
-            this.Test_Button.Text = "Test";
-            this.Test_Button.UseVisualStyleBackColor = true;
-            this.Test_Button.Visible = false;
-            this.Test_Button.Click += new System.EventHandler(this.Test_Button_Click);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 24);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(77, 12);
-            this.label5.TabIndex = 3;
-            this.label5.Text = "默认下载路径";
-            // 
-            // DownloadPath_TextBox
-            // 
-            this.DownloadPath_TextBox.Location = new System.Drawing.Point(89, 20);
-            this.DownloadPath_TextBox.Name = "DownloadPath_TextBox";
-            this.DownloadPath_TextBox.ReadOnly = true;
-            this.DownloadPath_TextBox.Size = new System.Drawing.Size(259, 21);
-            this.DownloadPath_TextBox.TabIndex = 4;
-            // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(354, 20);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(35, 23);
-            this.button4.TabIndex = 5;
-            this.button4.Text = "...";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // NetSpeed_TextBox
-            // 
-            this.NetSpeed_TextBox.Location = new System.Drawing.Point(181, 56);
-            this.NetSpeed_TextBox.MaxLength = 3;
-            this.NetSpeed_TextBox.Name = "NetSpeed_TextBox";
-            this.NetSpeed_TextBox.Size = new System.Drawing.Size(65, 21);
-            this.NetSpeed_TextBox.TabIndex = 1;
-            this.NetSpeed_TextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.NetSpeed_TextBox_KeyPress);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(101, 62);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 12);
-            this.label6.TabIndex = 0;
-            this.label6.Text = "物理带宽(M)";
-            // 
-            // Save_Button
-            // 
-            this.Save_Button.Location = new System.Drawing.Point(144, 417);
-            this.Save_Button.Name = "Save_Button";
-            this.Save_Button.Size = new System.Drawing.Size(102, 27);
-            this.Save_Button.TabIndex = 7;
-            this.Save_Button.Text = "保存";
-            this.Save_Button.UseVisualStyleBackColor = true;
-            this.Save_Button.Click += new System.EventHandler(this.Save_Button_Click);
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label7.Location = new System.Drawing.Point(12, 89);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(377, 17);
-            this.label7.TabIndex = 2;
-            this.label7.Text = "说明:根据物理带宽进行下载加速,请如实填写,填写过高会加大出错风险";
-            // 
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.label7);
@@ -589,6 +507,88 @@
             this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "下载设置";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label7.Location = new System.Drawing.Point(12, 89);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(377, 17);
+            this.label7.TabIndex = 2;
+            this.label7.Text = "说明:根据物理带宽进行下载加速,请如实填写,填写过高会加大出错风险";
+            // 
+            // Save_Button
+            // 
+            this.Save_Button.Location = new System.Drawing.Point(144, 417);
+            this.Save_Button.Name = "Save_Button";
+            this.Save_Button.Size = new System.Drawing.Size(102, 27);
+            this.Save_Button.TabIndex = 7;
+            this.Save_Button.Text = "保存";
+            this.Save_Button.UseVisualStyleBackColor = true;
+            this.Save_Button.Click += new System.EventHandler(this.Save_Button_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(101, 62);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(71, 12);
+            this.label6.TabIndex = 0;
+            this.label6.Text = "物理带宽(M)";
+            // 
+            // NetSpeed_TextBox
+            // 
+            this.NetSpeed_TextBox.Location = new System.Drawing.Point(181, 56);
+            this.NetSpeed_TextBox.MaxLength = 3;
+            this.NetSpeed_TextBox.Name = "NetSpeed_TextBox";
+            this.NetSpeed_TextBox.Size = new System.Drawing.Size(65, 21);
+            this.NetSpeed_TextBox.TabIndex = 1;
+            this.NetSpeed_TextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.NetSpeed_TextBox_KeyPress);
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(354, 20);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(35, 23);
+            this.button4.TabIndex = 5;
+            this.button4.Text = "...";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // DownloadPath_TextBox
+            // 
+            this.DownloadPath_TextBox.Location = new System.Drawing.Point(89, 20);
+            this.DownloadPath_TextBox.Name = "DownloadPath_TextBox";
+            this.DownloadPath_TextBox.ReadOnly = true;
+            this.DownloadPath_TextBox.Size = new System.Drawing.Size(259, 21);
+            this.DownloadPath_TextBox.TabIndex = 4;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(6, 24);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(77, 12);
+            this.label5.TabIndex = 3;
+            this.label5.Text = "默认下载路径";
+            // 
+            // UpdateDownLoadList_Timer
+            // 
+            this.UpdateDownLoadList_Timer.Enabled = true;
+            this.UpdateDownLoadList_Timer.Interval = 1000;
+            this.UpdateDownLoadList_Timer.Tick += new System.EventHandler(this.UpdateDownLoadList_Timer_Tick);
+            // 
+            // Test_Button
+            // 
+            this.Test_Button.Location = new System.Drawing.Point(488, 532);
+            this.Test_Button.Name = "Test_Button";
+            this.Test_Button.Size = new System.Drawing.Size(75, 23);
+            this.Test_Button.TabIndex = 12;
+            this.Test_Button.Text = "Test";
+            this.Test_Button.UseVisualStyleBackColor = true;
+            this.Test_Button.Visible = false;
+            this.Test_Button.Click += new System.EventHandler(this.Test_Button_Click);
             // 
             // Main
             // 

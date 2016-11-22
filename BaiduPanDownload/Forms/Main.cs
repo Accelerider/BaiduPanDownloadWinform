@@ -159,6 +159,7 @@ namespace BaiduPanDownload.Forms
             MessageBox.Show(
                 "文件名: " + info.getName() + Environment.NewLine +
                 "文件大小: " + (getSizeGB(info.size) < 1 ? getSizeMB(info.size) + " MB" : getSizeGB(info.size) + " GB") + Environment.NewLine +
+                "MD5:"+info.md5+Environment.NewLine+
                 "文件路径: " + info.path.Replace("apps", "我的应用数据")+Environment.NewLine+
                 "是不是文件夹: "+(info.isdir==1?"是":"不是")
                 ,"文件信息"
@@ -247,8 +248,8 @@ namespace BaiduPanDownload.Forms
             try
             {
                 JObject job = JObject.Parse(WebTool.GetHtml("http://www.mrs4s.top/api/update.json"));
-                //版本8
-                if ((int)job["Build"] > 8)
+                //版本9
+                if ((int)job["Build"] > 9)
                 {
                     DialogResult dr = MessageBox.Show((string)job["Message"] + "\r\n\r\n是否更新?", "发现更新", MessageBoxButtons.OKCancel);
                     if (dr == DialogResult.OK)
@@ -269,7 +270,8 @@ namespace BaiduPanDownload.Forms
 
         public void AddDownloadFile(DiskFileInfo info,string DownloadPath,string FileName)
         {
-            TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path=" + Uri.EscapeDataString(info.path),DownloadPath+"\\"+FileName);
+            //TaskManager.GetTastManager.CreateDownloadTask($"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path=" + Uri.EscapeDataString(info.path),DownloadPath+"\\"+FileName);
+            TaskManager.GetTastManager.CreateDownloadTask($"https://pcs.baidu.com/rest/2.0/pcs/file?method=download&access_token={Program.config.Access_Token}&path=" + Uri.EscapeDataString(info.path), DownloadPath + "\\" + FileName);
         }
 
         int getDownloadTaskNum()
