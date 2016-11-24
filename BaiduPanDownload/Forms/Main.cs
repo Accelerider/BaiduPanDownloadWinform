@@ -64,6 +64,7 @@ namespace BaiduPanDownload.Forms
             try
             {
                 Path_Lab.Text = "当前路径:" + path.ToString().Replace("apps", "我的应用数据");
+                var a = WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path=" + Uri.EscapeDataString($"{path.ToString()}"));
                 var jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path="+ Uri.EscapeDataString($"{path.ToString()}")));
                 FilelistView.BeginUpdate();
                 FilelistView.Items.Clear();
@@ -212,7 +213,7 @@ namespace BaiduPanDownload.Forms
 
         private void Main_Load(object sender, EventArgs e)
         {
-            System.Net.ServicePointManager.DefaultConnectionLimit = 99999;
+            System.Net.ServicePointManager.DefaultConnectionLimit = 999999;
             if (!Directory.Exists(Program.config.TempPath))
             {
                 Directory.CreateDirectory(Program.config.TempPath);
@@ -385,8 +386,8 @@ namespace BaiduPanDownload.Forms
                     DownloadListView.Items.Add(item);
                     continue;
                 }
-                DownloadListView.Items[Task.ID].SubItems[3].Text = (getSizeMB((long)Task.Speed) < 1 ? (Task.Speed / 1024) + "K/s" : getSizeMB((long)Task.Speed) + "M/s");
-                DownloadListView.Items[Task.ID].SubItems[4].Text = Task.Percentage + "%";
+                DownloadListView.Items[Task.ID].SubItems[3].Text = Task.Completed ? "0K/S" : (getSizeMB((long)Task.Speed) < 1 ? (Task.Speed / 1024) + "K/s" : getSizeMB((long)Task.Speed) + "M/s");
+                DownloadListView.Items[Task.ID].SubItems[4].Text = Task.Completed?"100%":Task.Percentage + "%";
                 DownloadListView.Items[Task.ID].SubItems[5].Text = Task.Downloading ? "下载中" : Task.Completed ? "下载完成" : "暂停中";
             }
             DownloadListView.EndUpdate();

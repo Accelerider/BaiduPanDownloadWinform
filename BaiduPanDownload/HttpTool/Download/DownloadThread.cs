@@ -41,7 +41,7 @@ namespace BaiduPanDownload.HttpTool.Download
             WorkThread=new Thread(Start);
             WorkThread.Start();
         }
-
+        int num=0;
         Thread WorkThread;
         HttpWebRequest Request;
         HttpWebResponse Response;
@@ -56,6 +56,7 @@ namespace BaiduPanDownload.HttpTool.Download
                     return;
                 }
                 Request = WebRequest.Create(DownloadUrl) as HttpWebRequest;
+                Request.Timeout = 5000;
                 Request.AddRange(Block.From,Block.To);
                 Response = Request.GetResponse() as HttpWebResponse;
                 if (!File.Exists(Path))
@@ -68,7 +69,7 @@ namespace BaiduPanDownload.HttpTool.Download
                     using (FileStream Stream=new FileStream(Path,FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                     {
                         Stream.Seek(Block.From, SeekOrigin.Begin);
-                        byte[] Array = new byte[1024];
+                        byte[] Array = new byte[4096];
                         int i = ResponseStream.Read(Array, 0, Array.Length);
                         while (i > 0)
                         {
@@ -93,6 +94,12 @@ namespace BaiduPanDownload.HttpTool.Download
                 if(ex.Message.Contains("终止") || ex.Message.Contains("取消"))
                 {
                     return;
+                }
+                if (num < 5)
+                {
+                    num++;
+                    Console.WriteLine("出现错误: " + ex.ToString()+"正在重试 次数"+num);
+                    Start();
                 }
                 Console.WriteLine("出现错误: "+ex.ToString());
             }
