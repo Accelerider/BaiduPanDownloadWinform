@@ -82,6 +82,7 @@
             this.label5 = new System.Windows.Forms.Label();
             this.UpdateDownLoadList_Timer = new System.Windows.Forms.Timer(this.components);
             this.Test_Button = new System.Windows.Forms.Button();
+            this.导出Aria2c命令ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.InfoMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -149,16 +150,17 @@
             this.新建文件夹ToolStripMenuItem,
             this.删除ToolStripMenuItem});
             this.InfoMenu.Name = "InfoMenu";
-            this.InfoMenu.Size = new System.Drawing.Size(137, 92);
+            this.InfoMenu.Size = new System.Drawing.Size(153, 114);
             this.InfoMenu.Opening += new System.ComponentModel.CancelEventHandler(this.InfoMenu_Opening);
             // 
             // 下载ToolStripMenuItem
             // 
             this.下载ToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.复制下载地址ToolStripMenuItem1,
-            this.添加到下载列表ToolStripMenuItem});
+            this.添加到下载列表ToolStripMenuItem,
+            this.导出Aria2c命令ToolStripMenuItem});
             this.下载ToolStripMenuItem.Name = "下载ToolStripMenuItem";
-            this.下载ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.下载ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.下载ToolStripMenuItem.Text = "下载";
             // 
             // 复制下载地址ToolStripMenuItem1
@@ -182,20 +184,20 @@
             this.粘贴ToolStripMenuItem,
             this.复制ToolStripMenuItem});
             this.文件操作ToolStripMenuItem.Name = "文件操作ToolStripMenuItem";
-            this.文件操作ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.文件操作ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.文件操作ToolStripMenuItem.Text = "文件操作";
             // 
             // 文件信息ToolStripMenuItem
             // 
             this.文件信息ToolStripMenuItem.Name = "文件信息ToolStripMenuItem";
-            this.文件信息ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.文件信息ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.文件信息ToolStripMenuItem.Text = "文件信息";
             this.文件信息ToolStripMenuItem.Click += new System.EventHandler(this.文件信息ToolStripMenuItem_Click_1);
             // 
             // 粘贴ToolStripMenuItem
             // 
             this.粘贴ToolStripMenuItem.Name = "粘贴ToolStripMenuItem";
-            this.粘贴ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.粘贴ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.粘贴ToolStripMenuItem.Text = "粘贴";
             this.粘贴ToolStripMenuItem.Click += new System.EventHandler(this.粘贴ToolStripMenuItem_Click);
             // 
@@ -203,21 +205,21 @@
             // 
             this.复制ToolStripMenuItem.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.复制ToolStripMenuItem.Name = "复制ToolStripMenuItem";
-            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(124, 22);
+            this.复制ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.复制ToolStripMenuItem.Text = "复制";
             this.复制ToolStripMenuItem.Click += new System.EventHandler(this.复制ToolStripMenuItem_Click);
             // 
             // 新建文件夹ToolStripMenuItem
             // 
             this.新建文件夹ToolStripMenuItem.Name = "新建文件夹ToolStripMenuItem";
-            this.新建文件夹ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.新建文件夹ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.新建文件夹ToolStripMenuItem.Text = "新建文件夹";
             this.新建文件夹ToolStripMenuItem.Click += new System.EventHandler(this.新建文件夹ToolStripMenuItem_Click);
             // 
             // 删除ToolStripMenuItem
             // 
             this.删除ToolStripMenuItem.Name = "删除ToolStripMenuItem";
-            this.删除ToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.删除ToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.删除ToolStripMenuItem.Text = "删除";
             this.删除ToolStripMenuItem.Click += new System.EventHandler(this.删除ToolStripMenuItem_Click);
             // 
@@ -341,7 +343,7 @@
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Font = new System.Drawing.Font("Microsoft YaHei", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(12, 11);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(658, 19);
@@ -475,7 +477,7 @@
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label12.Font = new System.Drawing.Font("Microsoft YaHei", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label12.Location = new System.Drawing.Point(410, 65);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(272, 238);
@@ -485,7 +487,7 @@
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label11.Font = new System.Drawing.Font("Microsoft YaHei", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label11.Location = new System.Drawing.Point(518, 20);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(42, 22);
@@ -511,7 +513,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label7.Font = new System.Drawing.Font("Microsoft YaHei", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label7.Location = new System.Drawing.Point(12, 89);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(377, 17);
@@ -589,6 +591,13 @@
             this.Test_Button.UseVisualStyleBackColor = true;
             this.Test_Button.Visible = false;
             this.Test_Button.Click += new System.EventHandler(this.Test_Button_Click);
+            // 
+            // 导出Aria2c命令ToolStripMenuItem
+            // 
+            this.导出Aria2c命令ToolStripMenuItem.Name = "导出Aria2c命令ToolStripMenuItem";
+            this.导出Aria2c命令ToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.导出Aria2c命令ToolStripMenuItem.Text = "导出Aria2c命令";
+            this.导出Aria2c命令ToolStripMenuItem.Click += new System.EventHandler(this.导出Aria2c命令ToolStripMenuItem_Click);
             // 
             // Main
             // 
@@ -682,5 +691,6 @@
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.TextBox DownloadPath_TextBox;
         private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.ToolStripMenuItem 导出Aria2c命令ToolStripMenuItem;
     }
 }

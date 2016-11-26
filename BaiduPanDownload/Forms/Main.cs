@@ -369,6 +369,33 @@ namespace BaiduPanDownload.Forms
             }
         }
 
+        private void CopyAria2Address()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (ListViewItem item in FilelistView.SelectedItems)
+            {
+                var info = Fileinfo[item.Text];
+                if (info.isdir == 1)
+                {
+                    Console.WriteLine("暂时不支持复制文件夹...");
+                }
+                else
+                {
+                    sb.AppendLine($"aria2c -c -s10 -k1M -x10 --enable-rpc=false \"https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={Program.config.Access_Token}&path=" + Uri.EscapeDataString($"{info.path}")+ "\"");
+                }
+            }
+            try
+            {
+
+                Clipboard.SetDataObject(sb.ToString());
+                Console.WriteLine(sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("访问剪贴板失败! " + ex.Message);
+            }
+        }
+
         private void UpdateDownLoadList_Timer_Tick(object sender, EventArgs e)
         {
             DownloadListView.BeginUpdate();
@@ -588,6 +615,16 @@ namespace BaiduPanDownload.Forms
         private void 继续ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).Start();
+        }
+
+        private void 导出Aria2c命令ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (!Fileinfo.ContainsKey(FilelistView.SelectedItems[0].Text))
+            {
+                MessageBox.Show("出现了未知错误! 请刷新重试");
+                return;
+            }
+            CopyAria2Address();
         }
     }
 }
