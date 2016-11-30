@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BaiduPanDownload.Util.FileTool;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -19,9 +20,9 @@ namespace BaiduPanDownload.HttpTool
         public static string GetHtml(string Url)
         {
             string sRslt = null;
+            LogTool.WriteLogDebug(typeof(WebTool),$"正在GET {Url} ");
             WebResponse oWebRps = null;
             HttpWebRequest rq = (HttpWebRequest)WebRequest.Create(Url);
-            
             rq.UserAgent = "Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.1; Trident/4.0; QQWubi 133; SLCC2; .NET CLR 2.0.50727; .NET CLR 3.5.30729; .NET CLR 3.0.30729; Media Center PC 6.0; CIBA; InfoPath.2)";
             rq.Method = "GET";
             rq.Timeout = 5000;
@@ -32,6 +33,7 @@ namespace BaiduPanDownload.HttpTool
             catch (Exception e)
             {
                 sRslt = "ERROR:" + e.Message;
+                LogTool.WriteLogError(typeof(WebTool),$"GET {Url} 时发生错误!",e);
             }
             finally
             {

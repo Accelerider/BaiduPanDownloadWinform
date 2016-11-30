@@ -3,6 +3,7 @@ using BaiduPanDownload.HttpTool;
 using BaiduPanDownload.HttpTool.Download;
 using BaiduPanDownload.Managers;
 using BaiduPanDownload.Util;
+using BaiduPanDownload.Util.FileTool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -49,13 +50,23 @@ namespace BaiduPanDownload.Forms
                 MessageBox.Show("你还未登录呢");
                 return;
             }
-            if (Info_Lab.Text == "正在刷新...")
+            if (Info_Lab.Text == "正在刷新")
             {
                 return;
             }
-            Info_Lab.Text = "正在刷新...";
-            SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
-            Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)",(float)info.used/1024/1024/1024,(float)info.quota/1024/1024/1024);
+            Info_Lab.Text = "正在刷新";
+            try
+            {
+                SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
+                Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)", (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+                Text = string.Format("已登录账户 [{0}]，已使用容量 {1} / {2} (GB)",DiskAPI.GetName(Program.config.Access_Token), (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+            }
+            catch (Exception ex)
+            {
+                LogTool.WriteLogError(typeof(Main), "更新容量信息时出现错误",ex);
+                MessageBox.Show("更新容量信息时出现错误,请尝试重新登录");
+                return;
+            }
             new Thread(updateFileList).Start(HomePath+Path);
         }
 
@@ -64,7 +75,6 @@ namespace BaiduPanDownload.Forms
             try
             {
                 Path_Lab.Text = "当前路径:" + path.ToString().Replace("apps", "我的应用数据");
-                var a = WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path=" + Uri.EscapeDataString($"{path.ToString()}"));
                 var jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path="+ Uri.EscapeDataString($"{path.ToString()}")));
                 FilelistView.BeginUpdate();
                 FilelistView.Items.Clear();
@@ -90,7 +100,7 @@ namespace BaiduPanDownload.Forms
             {
                 MessageBox.Show("更新文件列表时遇到意外的错误: "+ex.ToString());
             }
-            Info_Lab.Text = "等待中...";
+            Info_Lab.Text = "等待中";
         }
 
         void setEndItemImageKey(string key)
@@ -128,7 +138,10 @@ namespace BaiduPanDownload.Forms
                     new Thread(this.updateFileList).Start(HomePath + Path);
                     return;
                 }
-                new AddDownload(this, info).ShowDialog();
+                new Download()
+                {
+                    Info = info
+                }.ShowDialog();
             }
         }
 
@@ -223,11 +236,22 @@ namespace BaiduPanDownload.Forms
             {
                 return;
             }
-            SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
-            Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)", (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+            try
+            {
+                SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
+                Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)", (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+                Text = string.Format("已登录账户 [{0}]，已使用容量 {1} / {2} (GB)", DiskAPI.GetName(Program.config.Access_Token), (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+            }
+            catch (Exception ex)
+            {
+                LogTool.WriteLogError(typeof(Main), "更新容量信息时出现错误", ex);
+                MessageBox.Show("更新容量信息时出现错误,请尝试重新登录");
+                return;
+            }
             DownloadListView.View = View.Details;
             new Thread(updateFileList).Start(HomePath + Path);
             new Thread(Upgraded).Start();
+            new WebDownload().Listen();
         }
         void LoadConfig()
         {
@@ -249,8 +273,8 @@ namespace BaiduPanDownload.Forms
             try
             {
                 JObject job = JObject.Parse(WebTool.GetHtml("http://www.mrs4s.top/api/update.json"));
-                //版本9
-                if ((int)job["Build"] > 9)
+                //版本10
+                if ((int)job["Build"] > 10)
                 {
                     DialogResult dr = MessageBox.Show((string)job["Message"] + "\r\n\r\n是否更新?", "发现更新", MessageBoxButtons.OKCancel);
                     if (dr == DialogResult.OK)
@@ -327,7 +351,10 @@ namespace BaiduPanDownload.Forms
                     return;
                 }
                 DiskFileInfo info = Fileinfo[FilelistView.SelectedItems[i].Text];
-                new AddDownload(this, info).ShowDialog();
+                new Download()
+                {
+                    Info = info
+                }.ShowDialog();
             }
             //string url = string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token, info.path);
         }
@@ -428,7 +455,10 @@ namespace BaiduPanDownload.Forms
 
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
         {
+            this.UpdateDownLoadList_Timer.Stop();
+            this.UpdateDownLoadList_Timer.Dispose();
             TaskManager.GetTastManager.StopAndSave();
+            //Environment.Exit(0);
         }
         private void Test_Button_Click(object sender, EventArgs e)
         {

@@ -2,6 +2,7 @@
 using BaiduPanDownload.Data;
 using BaiduPanDownload.HttpTool;
 using BaiduPanDownload.Util;
+using BaiduPanDownload.Util.FileTool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,8 +12,11 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web;
 using System.Windows.Forms;
 
 namespace BaiduPanDownload.Forms
@@ -21,21 +25,64 @@ namespace BaiduPanDownload.Forms
     {
         Main main;
         BaiduPanDownload.Data.DiskFileInfo info;
-        public AddDownload(Main main, BaiduPanDownload.Data.DiskFileInfo info)
+        bool URLMode = false;
+        string Url = string.Empty;
+        public AddDownload(Main main, BaiduPanDownload.Data.DiskFileInfo info,bool URLMode=false,string Url="")
         {
             InitializeComponent();
             this.main = main;
             this.info = info;
+            this.URLMode = URLMode;
+            this.Url = Url;
         }
 
         private void AddDownload_Load(object sender, EventArgs e)
         {
             textBox1.Text = Program.config.DownloadPath;
+            this.TopMost = true;
+            if (URLMode)
+            {
+                FileName_Lab.Text = "文件名: 获取中";
+                FileSize_Lab.Text = "文件大小: 获取中";
+                DriveSpace_Lab.Text = textBox1.Text.Substring(0, 1) + "盘剩余空间: " + ((getSizeGB(GetFreeSpace(textBox1.Text.Substring(0, 1)))) < 1 ? getSizeMB(GetFreeSpace(textBox1.Text.Substring(0, 1))) + " MB" : getSizeGB(GetFreeSpace(textBox1.Text.Substring(0, 1))) + " GB");
+                button2.Enabled = false;
+                button2.Text = "请等待..";
+                new Thread(() =>
+                {
+                    try
+                    {
+                        HttpWebRequest Request = WebRequest.Create(Url) as HttpWebRequest;
+                        //Request.UserAgent = "netdisk;5.3.4.5;PC;PC-Windows;5.1.2600;WindowsBaiduYunGuanJia";
+                        Request.Timeout = 5000;
+                        Cookie ck = new Cookie("BDUSS", "gxQVpVd0FOSWl3LUxHWFhwSmo1bERSTFltTmNMcUloLUJlUDdsV0wzMmRLbHRZSVFBQUFBJCQAAAAAAAAAAAEAAAABq9szNDg5N2Y5cwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ2dM1idnTNYdz");
+                        ck.Domain = ".baidu.com";
+                        Request.CookieContainer = new CookieContainer();
+                        Request.CookieContainer.Add(ck);
+                        ck=new Cookie("pcsett", "1480509997-a88b34ea2ae3d43000459f113c929536");
+                        ck.Domain = ".baidu.com";
+                        Request.CookieContainer.Add(ck);
+                        Request.Referer = "http://pan.baidu.com/disk/home";
+                        HttpWebResponse Response = Request.GetResponse() as HttpWebResponse;
+                        string name = Response.Headers["Content-Disposition"];
+                        name = HttpUtility.UrlDecode(name);
+                        long length = Response.ContentLength;
+                        Regex rg = new Regex("(?<=(" + "=\"" + "))[.\\s\\S]*?(?=(" + "\"" + "))", RegexOptions.Multiline | RegexOptions.Singleline);
+                        FileName_Lab.Text = "文件名: " + rg.Match(name).Value;
+                        FileSize_Lab.Text = "文件大小: " +  (getSizeGB(length) < 1 ? getSizeMB(length) + " MB" : getSizeGB(length) + " GB");
+                        button2.Enabled = true;
+                        button2.Text = "添加下载";
+                    }
+                    catch(Exception ex)
+                    {
+                        LogTool.WriteLogError(typeof(AddDownload),"获取文件信息失败:"+Url,ex);
+                    }
+                }).Start();
+                return;
+            }
             FileName_Lab.Text = "文件名: "+info.getName();
             FileSize_Lab.Text = "文件大小: " + ((info.isdir==1)?"未知":(getSizeGB(info.size)<1?getSizeMB(info.size)+" MB":getSizeGB(info.size)+" GB"));
             DriveSpace_Lab.Text = textBox1.Text.Substring(0, 1) + "盘剩余空间: " + ((getSizeGB(GetFreeSpace(textBox1.Text.Substring(0, 1))))<1?getSizeMB(GetFreeSpace(textBox1.Text.Substring(0, 1)))+" MB":getSizeGB(GetFreeSpace(textBox1.Text.Substring(0, 1)))+" GB");
         }
-
         float getSizeGB(long byt)
         {
             return (float)byt / 1024 / 1024 / 1024;

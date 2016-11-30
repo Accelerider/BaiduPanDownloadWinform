@@ -29,6 +29,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -74,11 +76,16 @@
     <OutputPath>bin\x86\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -92,10 +99,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Operation\CopyInfo.cs" />
-    <Compile Include="Data\ListItem.cs" />
     <Compile Include="Data\DiskFileInfo.cs" />
     <Compile Include="Data\Operation\Delete.cs" />
-    <Compile Include="Data\Operation\ShareKey.cs" />
     <Compile Include="Data\SpaceInfo.cs" />
     <Compile Include="Data\Operation\SuperFile.cs" />
     <Compile Include="Forms\AddDownload.cs">
@@ -103,6 +108,12 @@
     </Compile>
     <Compile Include="Forms\AddDownload.Designer.cs">
       <DependentUpon>AddDownload.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Download.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Download.Designer.cs">
+      <DependentUpon>Download.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\InPutCode.cs">
       <SubType>Form</SubType>
@@ -128,10 +139,18 @@
     <Compile Include="Forms\NewDir.Designer.cs">
       <DependentUpon>NewDir.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Setting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Setting.Designer.cs">
+      <DependentUpon>Setting.cs</DependentUpon>
+    </Compile>
     <Compile Include="HttpTool\Download\DownloadInfo.cs" />
     <Compile Include="HttpTool\Download\DownloadThread.cs" />
     <Compile Include="HttpTool\Download\HttpDownload.cs" />
+    <Compile Include="HttpTool\WebDownload.cs" />
     <Compile Include="Managers\CopyManager.cs" />
+    <Compile Include="Managers\SQLManager.cs" />
     <Compile Include="Managers\TaskManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -140,10 +159,14 @@
     <Compile Include="Util\FileTool\Config.cs" />
     <Compile Include="HttpTool\WebTool.cs" />
     <Compile Include="Util\FileTool\HashTool.cs" />
+    <Compile Include="Util\FileTool\LogTool.cs" />
     <Compile Include="Util\ShowCommands.cs" />
     <Compile Include="Util\TaskState.cs" />
     <EmbeddedResource Include="Forms\AddDownload.resx">
       <DependentUpon>AddDownload.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Download.resx">
+      <DependentUpon>Download.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\InPutCode.resx">
       <DependentUpon>InPutCode.cs</DependentUpon>
@@ -156,6 +179,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\NewDir.resx">
       <DependentUpon>NewDir.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Setting.resx">
+      <DependentUpon>Setting.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -201,7 +227,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="HttpTool\Upload\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

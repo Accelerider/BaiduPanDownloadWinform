@@ -31,6 +31,10 @@ namespace BaiduPanDownload.HttpTool.Download
         /// </summary>
         public string DownloadUrl { get; set; }
         /// <summary>
+        /// Cookies,从网页下载的时候需要储存
+        /// </summary>
+        public CookiesData Cookies { get; set; }
+        /// <summary>
         /// 块大小
         /// </summary>
         public long BlockLength { get; set; }
@@ -91,7 +95,11 @@ namespace BaiduPanDownload.HttpTool.Download
         /// 是否完成
         /// </summary>
         public bool Completed { get; set; }
-
+    }
+    public class CookiesData
+    {
+        public string BDUSS { get; set; } = string.Empty;
+        public string PCSETT { get; set; } = string.Empty;
     }
 }
 
