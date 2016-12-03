@@ -46,11 +46,12 @@ namespace BaiduPanDownload.Forms
 
         private void Download_Load(object sender, EventArgs e)
         {
+            SwitchToThisWindow(this.Handle, true);
             new Thread(() => { init(); }).Start();
         }
         void init()
         {
-            SwitchToThisWindow(this.Handle, true);
+            
             textBox2.Text = Program.config.DownloadPath;
             string DriveName = textBox2.Text.Substring(0, 1);
             DiskInfo_Lab.Text = DriveName + "盘剩余空间: " + (getSizeGB(GetFreeSpace(DriveName)) < 1 ? getSizeMB(GetFreeSpace(DriveName)) + "MB" : getSizeGB(GetFreeSpace(DriveName)) + "GB");
@@ -111,7 +112,7 @@ namespace BaiduPanDownload.Forms
             }
             catch
             {
-                return 0L;
+                return -1L;
             }
         }
 
@@ -128,8 +129,18 @@ namespace BaiduPanDownload.Forms
                 return;
             }
             MessageBox.Show("警告:百度对分享的链接有时间限制,请在短时间内下载完成,超过一天很有可能无法断点续传");
-            TaskManager.GetTastManager.CreateDownloadTask(Url,textBox2.Text+"\\"+FileName,Cookies);
+            TaskManager.GetTastManager.CreateDownloadTask(Url,textBox2.Text+"\\"+FileName,Cookies,Program.config.NetSpeed*2);
             this.Close();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
+            folderBrowserDialog.Description = "请选择下载目录";
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
+            {
+                textBox2.Text = folderBrowserDialog.SelectedPath;
+            }
         }
     }
 }

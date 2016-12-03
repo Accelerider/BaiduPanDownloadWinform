@@ -6,8 +6,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace BaiduPanDownload.HttpTool.Download
 {
@@ -43,6 +41,7 @@ namespace BaiduPanDownload.HttpTool.Download
             WorkThread=new Thread(Start);
             WorkThread.Start();
         }
+        bool Stoped = false;
         int num=0;
         Thread WorkThread;
         HttpWebRequest Request;
@@ -52,6 +51,10 @@ namespace BaiduPanDownload.HttpTool.Download
             try
             {
                 Thread.Sleep(1000);
+                if (Stoped)
+                {
+                    return;
+                }
                 if (Block.Completed)
                 {
                     ThreadCompletedEvent?.Invoke();
@@ -70,7 +73,7 @@ namespace BaiduPanDownload.HttpTool.Download
                     ck.Domain = ".baidu.com";
                     Request.CookieContainer.Add(ck);
                 }
-                Request.Timeout = 10000;
+                Request.Timeout = 1000;
                 Request.AddRange(Block.From,Block.To);
                 Response = Request.GetResponse() as HttpWebResponse;
                 if (!File.Exists(Path))
@@ -143,6 +146,7 @@ namespace BaiduPanDownload.HttpTool.Download
             Request?.Abort();
             Response?.Close();
             WorkThread.Abort();
+            Stoped = true;
         }
     }
 }

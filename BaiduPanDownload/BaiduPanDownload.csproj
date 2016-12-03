@@ -103,6 +103,12 @@
     <Compile Include="Data\Operation\Delete.cs" />
     <Compile Include="Data\SpaceInfo.cs" />
     <Compile Include="Data\Operation\SuperFile.cs" />
+    <Compile Include="Forms\About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\AddDownload.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -160,8 +166,14 @@
     <Compile Include="HttpTool\WebTool.cs" />
     <Compile Include="Util\FileTool\HashTool.cs" />
     <Compile Include="Util\FileTool\LogTool.cs" />
+    <Compile Include="Util\ListViewRel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Util\ShowCommands.cs" />
     <Compile Include="Util\TaskState.cs" />
+    <EmbeddedResource Include="Forms\About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\AddDownload.resx">
       <DependentUpon>AddDownload.cs</DependentUpon>
     </EmbeddedResource>
@@ -209,6 +221,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="20161006015142287_easyicon_net_64.ico" />
+    <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -229,8 +242,16 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="HttpTool\Upload\" />
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Fody.1.28.3\build\Fody.targets" Condition="Exists('..\packages\Fody.1.28.3\build\Fody.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Fody.1.28.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.1.28.3\build\Fody.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

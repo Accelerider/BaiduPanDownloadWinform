@@ -27,37 +27,45 @@ namespace BaiduPanDownload.HttpTool
             {
                 Server.AuthenticationSchemes = AuthenticationSchemes.Anonymous;
                 Server.Prefixes.Add("http://127.0.0.1:36728/Download/");
-                Server.Start();
-                while (true)
+                try
                 {
-                    HttpListenerContext ctx = Server.GetContext();
-                    ctx.Response.StatusCode = 200;
-                    string Url = ctx.Request.QueryString["Url"];
-                    //直接用QueryString会乱码
-                    string Name = HttpUtility.UrlDecode(GetData(ctx.Request.RawUrl,"&Name=","&Cookies"));
-                    Name = Name.Split('/')[Name.Split('/').Length - 1];
-                    string Cookies = ctx.Request.QueryString["Cookies"];
-                    if(Url==null || Name==string.Empty || Cookies == null)
+                    Server.Start();
+                    while (true)
                     {
-                        LogTool.WriteLogInfo(typeof(WebDownload),"网页监听器接收到非法数据");
-                        ctx.Response.Close();
-                        continue;
-                    }
-                    new Thread(() =>
-                    {
-                        new BaiduPanDownload.Forms.Download()
+                        HttpListenerContext ctx = Server.GetContext();
+                        ctx.Response.StatusCode = 200;
+                        string Url = ctx.Request.QueryString["Url"];
+                        //直接用QueryString会乱码
+                        string Name = HttpUtility.UrlDecode(GetData(ctx.Request.RawUrl, "&Name=", "&Cookies"));
+                        Name = Name.Split('/')[Name.Split('/').Length - 1];
+                        string Cookies = ctx.Request.QueryString["Cookies"];
+                        if (Url == null || Name == string.Empty || Cookies == null)
                         {
-                            Url=Url,
-                            FileName=Name,
-                            Cookies = new CookiesData
+                            LogTool.WriteLogInfo(typeof(WebDownload), "网页监听器接收到非法数据");
+                            ctx.Response.Close();
+                            continue;
+                        }
+                        new Thread(() =>
+                        {
+                            new BaiduPanDownload.Forms.Download()
                             {
-                                BDUSS = GetData(Cookies, "BDUSS=", ";pcsett="),
-                                PCSETT = GetData(Cookies, ";pcsett=", "end")
-                            }
-                        }.ShowDialog();
-                    }).Start();
-                    ctx.Response.Close();
+                                Url = Url,
+                                FileName = Name,
+                                Cookies = new CookiesData
+                                {
+                                    BDUSS = GetData(Cookies, "BDUSS=", ";pcsett="),
+                                    PCSETT = GetData(Cookies, ";pcsett=", "end")
+                                }
+                            }.ShowDialog();
+                        }).Start();
+                        ctx.Response.Close();
+                    }
+                }catch(Exception ex)
+                {
+                    LogTool.WriteLogError(typeof(WebDownload),"监听网页请求时出现错误!",ex);
+                    MessageBox.Show("监听网页请求时出现错误: "+ex.Message+"\r\n这个错误会导致无法监听浏览器的下载请求,但是不影响软件的正常使用,如果一直出现这个错误请在设置里面关闭监听");
                 }
+
             }
         }
         string GetData(string str,string p1,string p2)

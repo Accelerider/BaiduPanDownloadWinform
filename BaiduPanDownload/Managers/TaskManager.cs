@@ -65,7 +65,7 @@ namespace BaiduPanDownload.Managers
         /// <param name="DownloadUrl"></param>
         /// <param name="DownloadPath"></param>
         /// <param name="ThreadNum"></param>
-        public void CreateDownloadTask(string DownloadUrl,string DownloadPath,CookiesData Cookies=null)
+        public void CreateDownloadTask(string DownloadUrl,string DownloadPath,CookiesData Cookies=null,int ThreadNum=0)
         {
             if (File.Exists(DownloadPath))
             {
@@ -77,7 +77,7 @@ namespace BaiduPanDownload.Managers
                 ID=TaskList.Count,
                 Url=DownloadUrl,
                 DownloadPath=DownloadPath,
-                ThreadNum=Program.config.NetSpeed,
+                ThreadNum=ThreadNum==0?Program.config.NetSpeed:ThreadNum,
                 Cookies=Cookies
             };
             Task.CreateDataFile();

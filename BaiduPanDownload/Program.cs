@@ -30,7 +30,7 @@ namespace BaiduPanDownload
                     Access_Token = "null",
                     DownloadPath=@"D:\BaiduYunDownload"
                 }.save();
-                MessageBox.Show("欢迎使用本工具,有几点需要注意的地方:\r\n1.高速下载是以硬盘的读写为代价的,一般来说100M的网速机械硬盘就会跟不上,请尽量下载到机械\r\n2.软件目前稳定性还不够,请尽量吧所有任务暂停了再关闭!");
+                MessageBox.Show("欢迎使用本工具,有几点需要注意的地方:\r\n1.高速下载是以硬盘的读写为代价的,一般来说100M的网速机械硬盘就会跟不上,请尽量下载到固态\r\n2.软件目前稳定性还不够,请尽量吧所有任务暂停了再关闭!");
             }
             try
             {

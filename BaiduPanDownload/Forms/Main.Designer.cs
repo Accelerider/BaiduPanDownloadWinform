@@ -1,4 +1,6 @@
-﻿namespace BaiduPanDownload.Forms
+﻿using BaiduPanDownload.Util;
+
+namespace BaiduPanDownload.Forms
 {
     partial class Main
     {
@@ -32,7 +34,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
-            this.Used_Lab = new System.Windows.Forms.Label();
             this.FilelistView = new System.Windows.Forms.ListView();
             this.InfoMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.下载ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -46,19 +47,14 @@
             this.删除ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.IconList = new System.Windows.Forms.ImageList(this.components);
             this.Path_Lab = new System.Windows.Forms.Label();
-            this.Back_Button = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button5 = new System.Windows.Forms.Button();
+            this.Path_ComboBox = new System.Windows.Forms.ComboBox();
+            this.Back_Button = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.label1 = new System.Windows.Forms.Label();
-            this.DownloadListView = new System.Windows.Forms.ListView();
-            this.xID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.xName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.DownLoadPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.Speed = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.Schedule = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.State = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.DownLoadListMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.暂停ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.继续ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -66,37 +62,34 @@
             this.打开目录ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.label2 = new System.Windows.Forms.Label();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.label12 = new System.Windows.Forms.Label();
-            this.label11 = new System.Windows.Forms.Label();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.Save_Button = new System.Windows.Forms.Button();
-            this.label6 = new System.Windows.Forms.Label();
-            this.NetSpeed_TextBox = new System.Windows.Forms.TextBox();
-            this.button4 = new System.Windows.Forms.Button();
-            this.DownloadPath_TextBox = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.UpdateDownLoadList_Timer = new System.Windows.Forms.Timer(this.components);
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.Info_Lab = new System.Windows.Forms.ToolStripStatusLabel();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
+            this.DownloadListView = new BaiduPanDownload.Util.ListViewRel();
+            this.xID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.xName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.DownLoadPath = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Speed = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Schedule = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.State = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.InfoMenu.SuspendLayout();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             this.DownLoadListMenu.SuspendLayout();
             this.tabPage3.SuspendLayout();
-            this.tabPage4.SuspendLayout();
-            this.groupBox1.SuspendLayout();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.button1.Location = new System.Drawing.Point(618, 499);
+            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button1.Location = new System.Drawing.Point(512, 6);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.Size = new System.Drawing.Size(51, 36);
             this.button1.TabIndex = 0;
             this.button1.Text = "登录";
             this.button1.UseVisualStyleBackColor = true;
@@ -104,23 +97,15 @@
             // 
             // button2
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.button2.Location = new System.Drawing.Point(589, 5);
+            this.button2.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button2.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button2.Location = new System.Drawing.Point(65, 6);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.Size = new System.Drawing.Size(51, 36);
             this.button2.TabIndex = 1;
             this.button2.Text = "刷新";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // Used_Lab
-            // 
-            this.Used_Lab.AutoSize = true;
-            this.Used_Lab.Location = new System.Drawing.Point(6, 7);
-            this.Used_Lab.Name = "Used_Lab";
-            this.Used_Lab.Size = new System.Drawing.Size(107, 12);
-            this.Used_Lab.TabIndex = 2;
-            this.Used_Lab.Text = "网盘已使用:未刷新";
             // 
             // FilelistView
             // 
@@ -130,9 +115,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.FilelistView.ContextMenuStrip = this.InfoMenu;
             this.FilelistView.LargeImageList = this.IconList;
-            this.FilelistView.Location = new System.Drawing.Point(8, 45);
+            this.FilelistView.Location = new System.Drawing.Point(-4, 45);
             this.FilelistView.Name = "FilelistView";
-            this.FilelistView.Size = new System.Drawing.Size(656, 408);
+            this.FilelistView.Size = new System.Drawing.Size(639, 474);
             this.FilelistView.TabIndex = 3;
             this.FilelistView.UseCompatibleStateImageBehavior = false;
             this.FilelistView.DragDrop += new System.Windows.Forms.DragEventHandler(this.FilelistView_DragDrop);
@@ -232,22 +217,11 @@
             // Path_Lab
             // 
             this.Path_Lab.AutoSize = true;
-            this.Path_Lab.Location = new System.Drawing.Point(4, 27);
+            this.Path_Lab.Location = new System.Drawing.Point(126, 18);
             this.Path_Lab.Name = "Path_Lab";
-            this.Path_Lab.Size = new System.Drawing.Size(179, 12);
+            this.Path_Lab.Size = new System.Drawing.Size(59, 12);
             this.Path_Lab.TabIndex = 6;
-            this.Path_Lab.Text = "当前路径:/我的应用数据/wp2pcs";
-            // 
-            // Back_Button
-            // 
-            this.Back_Button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.Back_Button.Location = new System.Drawing.Point(12, 501);
-            this.Back_Button.Name = "Back_Button";
-            this.Back_Button.Size = new System.Drawing.Size(75, 23);
-            this.Back_Button.TabIndex = 8;
-            this.Back_Button.Text = "返回上层";
-            this.Back_Button.UseVisualStyleBackColor = true;
-            this.Back_Button.Click += new System.EventHandler(this.Back_Button_Click);
+            this.Path_Lab.Text = "当前路径:";
             // 
             // button3
             // 
@@ -267,26 +241,65 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Location = new System.Drawing.Point(12, 12);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(678, 485);
+            this.tabControl1.Size = new System.Drawing.Size(645, 541);
             this.tabControl1.TabIndex = 11;
             // 
             // tabPage1
             // 
-            this.tabPage1.Controls.Add(this.Used_Lab);
+            this.tabPage1.Controls.Add(this.button5);
+            this.tabPage1.Controls.Add(this.Path_ComboBox);
             this.tabPage1.Controls.Add(this.Path_Lab);
             this.tabPage1.Controls.Add(this.button2);
             this.tabPage1.Controls.Add(this.FilelistView);
+            this.tabPage1.Controls.Add(this.button1);
+            this.tabPage1.Controls.Add(this.Back_Button);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(670, 459);
+            this.tabPage1.Size = new System.Drawing.Size(637, 515);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "网盘文件";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button5
+            // 
+            this.button5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.button5.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.button5.Location = new System.Drawing.Point(570, 6);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(51, 36);
+            this.button5.TabIndex = 10;
+            this.button5.Text = "设置";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // Path_ComboBox
+            // 
+            this.Path_ComboBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.Path_ComboBox.FormattingEnabled = true;
+            this.Path_ComboBox.Location = new System.Drawing.Point(190, 14);
+            this.Path_ComboBox.Name = "Path_ComboBox";
+            this.Path_ComboBox.Size = new System.Drawing.Size(316, 20);
+            this.Path_ComboBox.TabIndex = 9;
+            this.Path_ComboBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Path_ComboBox_KeyPress);
+            // 
+            // Back_Button
+            // 
+            this.Back_Button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Back_Button.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Back_Button.ForeColor = System.Drawing.Color.Black;
+            this.Back_Button.Location = new System.Drawing.Point(8, 6);
+            this.Back_Button.Name = "Back_Button";
+            this.Back_Button.Size = new System.Drawing.Size(51, 36);
+            this.Back_Button.TabIndex = 8;
+            this.Back_Button.Text = "返回";
+            this.Back_Button.UseVisualStyleBackColor = true;
+            this.Back_Button.Click += new System.EventHandler(this.Back_Button_Click);
             // 
             // tabPage2
             // 
@@ -295,7 +308,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(670, 489);
+            this.tabPage2.Size = new System.Drawing.Size(637, 515);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "下载管理";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -308,61 +321,8 @@
             this.label1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.Location = new System.Drawing.Point(12, 11);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(658, 19);
+            this.label1.Size = new System.Drawing.Size(0, 19);
             this.label1.TabIndex = 1;
-            this.label1.Text = "注意:百度更新后已限速,使用软件自带的下载能在一定程度上提速,如果下载到99+后0K/S请尝试暂停重试";
-            // 
-            // DownloadListView
-            // 
-            this.DownloadListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.DownloadListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.xID,
-            this.xName,
-            this.DownLoadPath,
-            this.Speed,
-            this.Schedule,
-            this.State});
-            this.DownloadListView.ContextMenuStrip = this.DownLoadListMenu;
-            this.DownloadListView.FullRowSelect = true;
-            this.DownloadListView.GridLines = true;
-            this.DownloadListView.Location = new System.Drawing.Point(6, 38);
-            this.DownloadListView.Name = "DownloadListView";
-            this.DownloadListView.Size = new System.Drawing.Size(661, 420);
-            this.DownloadListView.TabIndex = 0;
-            this.DownloadListView.UseCompatibleStateImageBehavior = false;
-            this.DownloadListView.View = System.Windows.Forms.View.Details;
-            this.DownloadListView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.DownloadListView_MouseDoubleClick);
-            // 
-            // xID
-            // 
-            this.xID.Text = "ID";
-            // 
-            // xName
-            // 
-            this.xName.Text = "文件名";
-            this.xName.Width = 146;
-            // 
-            // DownLoadPath
-            // 
-            this.DownLoadPath.Text = "文件路径";
-            this.DownLoadPath.Width = 147;
-            // 
-            // Speed
-            // 
-            this.Speed.Text = "传输速度";
-            this.Speed.Width = 113;
-            // 
-            // Schedule
-            // 
-            this.Schedule.Text = "传输进度";
-            this.Schedule.Width = 97;
-            // 
-            // State
-            // 
-            this.State.Text = "状态";
-            this.State.Width = 87;
             // 
             // DownLoadListMenu
             // 
@@ -409,7 +369,7 @@
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(670, 489);
+            this.tabPage3.Size = new System.Drawing.Size(637, 515);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "账号管理";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -423,120 +383,6 @@
             this.label2.TabIndex = 0;
             this.label2.Text = "尚未完成。。";
             // 
-            // tabPage4
-            // 
-            this.tabPage4.Controls.Add(this.label12);
-            this.tabPage4.Controls.Add(this.label11);
-            this.tabPage4.Controls.Add(this.groupBox1);
-            this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(670, 489);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "设置";
-            this.tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // label12
-            // 
-            this.label12.AutoSize = true;
-            this.label12.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label12.Location = new System.Drawing.Point(410, 65);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(272, 238);
-            this.label12.TabIndex = 2;
-            this.label12.Text = resources.GetString("label12.Text");
-            // 
-            // label11
-            // 
-            this.label11.AutoSize = true;
-            this.label11.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label11.Location = new System.Drawing.Point(518, 20);
-            this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(42, 22);
-            this.label11.TabIndex = 1;
-            this.label11.Text = "说明";
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.label7);
-            this.groupBox1.Controls.Add(this.Save_Button);
-            this.groupBox1.Controls.Add(this.label6);
-            this.groupBox1.Controls.Add(this.NetSpeed_TextBox);
-            this.groupBox1.Controls.Add(this.button4);
-            this.groupBox1.Controls.Add(this.DownloadPath_TextBox);
-            this.groupBox1.Controls.Add(this.label5);
-            this.groupBox1.Location = new System.Drawing.Point(6, 6);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(402, 449);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "下载设置";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label7.Location = new System.Drawing.Point(12, 89);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(377, 17);
-            this.label7.TabIndex = 2;
-            this.label7.Text = "说明:根据物理带宽进行下载加速,请如实填写,填写过高会加大出错风险";
-            // 
-            // Save_Button
-            // 
-            this.Save_Button.Location = new System.Drawing.Point(144, 417);
-            this.Save_Button.Name = "Save_Button";
-            this.Save_Button.Size = new System.Drawing.Size(102, 27);
-            this.Save_Button.TabIndex = 7;
-            this.Save_Button.Text = "保存";
-            this.Save_Button.UseVisualStyleBackColor = true;
-            this.Save_Button.Click += new System.EventHandler(this.Save_Button_Click);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(101, 62);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(71, 12);
-            this.label6.TabIndex = 0;
-            this.label6.Text = "物理带宽(M)";
-            // 
-            // NetSpeed_TextBox
-            // 
-            this.NetSpeed_TextBox.Location = new System.Drawing.Point(181, 56);
-            this.NetSpeed_TextBox.MaxLength = 3;
-            this.NetSpeed_TextBox.Name = "NetSpeed_TextBox";
-            this.NetSpeed_TextBox.Size = new System.Drawing.Size(65, 21);
-            this.NetSpeed_TextBox.TabIndex = 1;
-            this.NetSpeed_TextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.NetSpeed_TextBox_KeyPress);
-            // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(354, 20);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(35, 23);
-            this.button4.TabIndex = 5;
-            this.button4.Text = "...";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // DownloadPath_TextBox
-            // 
-            this.DownloadPath_TextBox.Location = new System.Drawing.Point(89, 20);
-            this.DownloadPath_TextBox.Name = "DownloadPath_TextBox";
-            this.DownloadPath_TextBox.ReadOnly = true;
-            this.DownloadPath_TextBox.Size = new System.Drawing.Size(259, 21);
-            this.DownloadPath_TextBox.TabIndex = 4;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(6, 24);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(77, 12);
-            this.label5.TabIndex = 3;
-            this.label5.Text = "默认下载路径";
-            // 
             // UpdateDownLoadList_Timer
             // 
             this.UpdateDownLoadList_Timer.Enabled = true;
@@ -547,9 +393,9 @@
             // 
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Info_Lab});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 534);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 556);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(702, 22);
+            this.statusStrip1.Size = new System.Drawing.Size(669, 22);
             this.statusStrip1.TabIndex = 12;
             this.statusStrip1.Text = "statusStrip1";
             // 
@@ -559,16 +405,78 @@
             this.Info_Lab.Size = new System.Drawing.Size(44, 17);
             this.Info_Lab.Text = "等待中";
             // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.Location = new System.Drawing.Point(564, 562);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(89, 12);
+            this.linkLabel1.TabIndex = 13;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Text = "关于作者与帮助";
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
+            // 
+            // DownloadListView
+            // 
+            this.DownloadListView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.DownloadListView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.xID,
+            this.xName,
+            this.DownLoadPath,
+            this.Speed,
+            this.Schedule,
+            this.State});
+            this.DownloadListView.ContextMenuStrip = this.DownLoadListMenu;
+            this.DownloadListView.FullRowSelect = true;
+            this.DownloadListView.GridLines = true;
+            this.DownloadListView.Location = new System.Drawing.Point(3, 22);
+            this.DownloadListView.Name = "DownloadListView";
+            this.DownloadListView.Size = new System.Drawing.Size(631, 497);
+            this.DownloadListView.TabIndex = 0;
+            this.DownloadListView.UseCompatibleStateImageBehavior = false;
+            this.DownloadListView.View = System.Windows.Forms.View.Details;
+            this.DownloadListView.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.DownloadListView_MouseDoubleClick);
+            // 
+            // xID
+            // 
+            this.xID.Text = "ID";
+            // 
+            // xName
+            // 
+            this.xName.Text = "文件名";
+            this.xName.Width = 146;
+            // 
+            // DownLoadPath
+            // 
+            this.DownLoadPath.Text = "文件路径";
+            this.DownLoadPath.Width = 147;
+            // 
+            // Speed
+            // 
+            this.Speed.Text = "传输速度";
+            this.Speed.Width = 90;
+            // 
+            // Schedule
+            // 
+            this.Schedule.Text = "传输进度";
+            this.Schedule.Width = 97;
+            // 
+            // State
+            // 
+            this.State.Text = "状态";
+            this.State.Width = 87;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(702, 556);
-            this.Controls.Add(this.statusStrip1);
+            this.ClientSize = new System.Drawing.Size(669, 578);
+            this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.button3);
-            this.Controls.Add(this.Back_Button);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.statusStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Main";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -584,10 +492,6 @@
             this.DownLoadListMenu.ResumeLayout(false);
             this.tabPage3.ResumeLayout(false);
             this.tabPage3.PerformLayout();
-            this.tabPage4.ResumeLayout(false);
-            this.tabPage4.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -599,7 +503,6 @@
 
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Label Used_Lab;
         private System.Windows.Forms.ListView FilelistView;
         private System.Windows.Forms.ImageList IconList;
         private System.Windows.Forms.Label Path_Lab;
@@ -611,7 +514,7 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.ListView DownloadListView;
+        private ListViewRel DownloadListView;
         private System.Windows.Forms.ColumnHeader DownLoadPath;
         private System.Windows.Forms.ColumnHeader Speed;
         private System.Windows.Forms.ColumnHeader Schedule;
@@ -631,21 +534,13 @@
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.ColumnHeader xID;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TabPage tabPage4;
-        private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.Label label12;
         private System.Windows.Forms.ToolStripMenuItem 暂停ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 继续ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 终止ToolStripMenuItem;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Button Save_Button;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox NetSpeed_TextBox;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.TextBox DownloadPath_TextBox;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel Info_Lab;
+        private System.Windows.Forms.ComboBox Path_ComboBox;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.LinkLabel linkLabel1;
     }
 }
