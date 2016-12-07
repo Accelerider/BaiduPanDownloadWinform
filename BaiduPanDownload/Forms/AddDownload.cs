@@ -2,6 +2,7 @@
 using BaiduPanDownload.Data;
 using BaiduPanDownload.HttpTool;
 using BaiduPanDownload.Util;
+using BaiduPanDownload.Util.FileTool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -11,8 +12,11 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web;
 using System.Windows.Forms;
 
 namespace BaiduPanDownload.Forms
@@ -21,21 +25,34 @@ namespace BaiduPanDownload.Forms
     {
         Main main;
         BaiduPanDownload.Data.DiskFileInfo info;
-        public AddDownload(Main main, BaiduPanDownload.Data.DiskFileInfo info)
+        bool URLMode = false;
+        string Url = string.Empty;
+        public AddDownload(Main main, BaiduPanDownload.Data.DiskFileInfo info,bool URLMode=false,string Url="")
         {
             InitializeComponent();
             this.main = main;
             this.info = info;
+            this.URLMode = URLMode;
+            this.Url = Url;
         }
 
         private void AddDownload_Load(object sender, EventArgs e)
         {
             textBox1.Text = Program.config.DownloadPath;
+            this.TopMost = true;
+            if (URLMode)
+            {
+                FileName_Lab.Text = "文件名: 获取中";
+                FileSize_Lab.Text = "文件大小: 获取中";
+                DriveSpace_Lab.Text = textBox1.Text.Substring(0, 1) + "盘剩余空间: " + ((getSizeGB(GetFreeSpace(textBox1.Text.Substring(0, 1)))) < 1 ? getSizeMB(GetFreeSpace(textBox1.Text.Substring(0, 1))) + " MB" : getSizeGB(GetFreeSpace(textBox1.Text.Substring(0, 1))) + " GB");
+                button2.Enabled = false;
+                button2.Text = "请等待..";
+                return;
+            }
             FileName_Lab.Text = "文件名: "+info.getName();
             FileSize_Lab.Text = "文件大小: " + ((info.isdir==1)?"未知":(getSizeGB(info.size)<1?getSizeMB(info.size)+" MB":getSizeGB(info.size)+" GB"));
             DriveSpace_Lab.Text = textBox1.Text.Substring(0, 1) + "盘剩余空间: " + ((getSizeGB(GetFreeSpace(textBox1.Text.Substring(0, 1))))<1?getSizeMB(GetFreeSpace(textBox1.Text.Substring(0, 1)))+" MB":getSizeGB(GetFreeSpace(textBox1.Text.Substring(0, 1)))+" GB");
         }
-
         float getSizeGB(long byt)
         {
             return (float)byt / 1024 / 1024 / 1024;

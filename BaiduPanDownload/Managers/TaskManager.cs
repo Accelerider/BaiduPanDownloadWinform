@@ -65,7 +65,7 @@ namespace BaiduPanDownload.Managers
         /// <param name="DownloadUrl"></param>
         /// <param name="DownloadPath"></param>
         /// <param name="ThreadNum"></param>
-        public void CreateDownloadTask(string DownloadUrl,string DownloadPath)
+        public void CreateDownloadTask(string DownloadUrl,string DownloadPath,CookiesData Cookies=null,int ThreadNum=0)
         {
             if (File.Exists(DownloadPath))
             {
@@ -77,7 +77,8 @@ namespace BaiduPanDownload.Managers
                 ID=TaskList.Count,
                 Url=DownloadUrl,
                 DownloadPath=DownloadPath,
-                ThreadNum=Program.config.NetSpeed
+                ThreadNum=ThreadNum==0?Program.config.NetSpeed:ThreadNum,
+                Cookies=Cookies
             };
             Task.CreateDataFile();
             Program.config.SetDownloadInfo(DownloadPath+".dcj",false);
@@ -158,6 +159,16 @@ namespace BaiduPanDownload.Managers
                 return null;
             }
             return TaskList[id];
+        }
+
+        /// <summary>
+        /// 通过ID获取任务速度
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public long GetSpeedByID(int id)
+        {
+            return 0L;
         }
     }
 }

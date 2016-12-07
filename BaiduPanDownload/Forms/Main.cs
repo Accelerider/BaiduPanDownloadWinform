@@ -3,6 +3,7 @@ using BaiduPanDownload.HttpTool;
 using BaiduPanDownload.HttpTool.Download;
 using BaiduPanDownload.Managers;
 using BaiduPanDownload.Util;
+using BaiduPanDownload.Util.FileTool;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -49,13 +50,19 @@ namespace BaiduPanDownload.Forms
                 MessageBox.Show("你还未登录呢");
                 return;
             }
-            if (Info_Lab.Text == "正在刷新...")
+            try
             {
+                SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
+                //Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)", (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+                Text = string.Format("已登录账户 [{0}]，已使用容量 {1} / {2} (GB)",DiskAPI.GetName(Program.config.Access_Token), (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+                
+            }
+            catch (Exception ex)
+            {
+                LogTool.WriteLogError(typeof(Main), "更新容量信息时出现错误",ex);
+                MessageBox.Show("更新容量信息时出现错误,请尝试重新登录");
                 return;
             }
-            Info_Lab.Text = "正在刷新...";
-            SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
-            Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)",(float)info.used/1024/1024/1024,(float)info.quota/1024/1024/1024);
             new Thread(updateFileList).Start(HomePath+Path);
         }
 
@@ -63,8 +70,8 @@ namespace BaiduPanDownload.Forms
         {
             try
             {
-                Path_Lab.Text = "当前路径:" + path.ToString().Replace("apps", "我的应用数据");
-                var a = WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path=" + Uri.EscapeDataString($"{path.ToString()}"));
+                Info_Lab.Text = "刷新中..";
+                Path_ComboBox.Text = path.ToString().Replace("apps", "我的应用数据");
                 var jobj = JObject.Parse(WebTool.GetHtml($"https://pcs.baidu.com/rest/2.0/pcs/file?method=list&access_token={Program.config.Access_Token}&path="+ Uri.EscapeDataString($"{path.ToString()}")));
                 FilelistView.BeginUpdate();
                 FilelistView.Items.Clear();
@@ -90,7 +97,7 @@ namespace BaiduPanDownload.Forms
             {
                 MessageBox.Show("更新文件列表时遇到意外的错误: "+ex.ToString());
             }
-            Info_Lab.Text = "等待中...";
+            Info_Lab.Text = "等待中";
         }
 
         void setEndItemImageKey(string key)
@@ -128,7 +135,10 @@ namespace BaiduPanDownload.Forms
                     new Thread(this.updateFileList).Start(HomePath + Path);
                     return;
                 }
-                new AddDownload(this, info).ShowDialog();
+                new Download()
+                {
+                    Info = info
+                }.ShowDialog();
             }
         }
 
@@ -219,15 +229,30 @@ namespace BaiduPanDownload.Forms
                 Directory.CreateDirectory(Program.config.TempPath);
             }
             LoadConfig();
+            if (Program.config.WebDownload)
+            {
+                new WebDownload().Listen();
+            }
+            new Thread(Upgraded).Start();
             if (Program.config.Access_Token == "null" || Program.config.Access_Token == string.Empty)
             {
                 return;
             }
-            SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
-            Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)", (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+            try
+            {
+                SpaceInfo info = JsonConvert.DeserializeObject<SpaceInfo>(WebTool.GetHtml("https://pcs.baidu.com/rest/2.0/pcs/quota?method=info&access_token=" + Program.config.Access_Token));
+               // Used_Lab.Text = string.Format("网盘已使用: {0} / {1} (GB)", (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+                Text = string.Format("已登录账户 [{0}]，已使用容量 {1} / {2} (GB)", DiskAPI.GetName(Program.config.Access_Token), (float)info.used / 1024 / 1024 / 1024, (float)info.quota / 1024 / 1024 / 1024);
+            }
+            catch (Exception ex)
+            {
+                LogTool.WriteLogError(typeof(Main), "更新容量信息时出现错误", ex);
+                MessageBox.Show("更新容量信息时出现错误,请尝试重新登录");
+                return;
+            }
             DownloadListView.View = View.Details;
             new Thread(updateFileList).Start(HomePath + Path);
-            new Thread(Upgraded).Start();
+            
         }
         void LoadConfig()
         {
@@ -237,8 +262,6 @@ namespace BaiduPanDownload.Forms
                 Program.config.save();
                 MessageBox.Show("暂时不兼容这么快的网速");
             }
-            DownloadPath_TextBox.Text = Program.config.DownloadPath;
-            NetSpeed_TextBox.Text = Program.config.NetSpeed.ToString();
             TaskManager.GetTastManager.ReloadTask();
         }
         /// <summary>
@@ -249,8 +272,8 @@ namespace BaiduPanDownload.Forms
             try
             {
                 JObject job = JObject.Parse(WebTool.GetHtml("http://www.mrs4s.top/api/update.json"));
-                //版本9
-                if ((int)job["Build"] > 9)
+                //版本12
+                if ((int)job["Build"] > 12)
                 {
                     DialogResult dr = MessageBox.Show((string)job["Message"] + "\r\n\r\n是否更新?", "发现更新", MessageBoxButtons.OKCancel);
                     if (dr == DialogResult.OK)
@@ -327,7 +350,10 @@ namespace BaiduPanDownload.Forms
                     return;
                 }
                 DiskFileInfo info = Fileinfo[FilelistView.SelectedItems[i].Text];
-                new AddDownload(this, info).ShowDialog();
+                new Download()
+                {
+                    Info = info
+                }.ShowDialog();
             }
             //string url = string.Format("https://www.baidupcs.com/rest/2.0/pcs/stream?method=download&access_token={0}&path={1}", Program.config.Access_Token, info.path);
         }
@@ -428,7 +454,10 @@ namespace BaiduPanDownload.Forms
 
         private void Main_FormClosing(object sender, FormClosingEventArgs e)
         {
+            this.UpdateDownLoadList_Timer.Stop();
+            this.UpdateDownLoadList_Timer.Dispose();
             TaskManager.GetTastManager.StopAndSave();
+            //Environment.Exit(0);
         }
         private void Test_Button_Click(object sender, EventArgs e)
         {
@@ -536,23 +565,6 @@ namespace BaiduPanDownload.Forms
             var Task=TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text));
         }
 
-        private void Save_Button_Click(object sender, EventArgs e)
-        {
-            if(DownloadPath_TextBox.Text==string.Empty || NetSpeed_TextBox.Text==string.Empty)
-            {
-                MessageBox.Show("保存失败: 参数错误");
-                return;
-            }
-            if (int.Parse(NetSpeed_TextBox.Text) > 120)
-            {
-                MessageBox.Show("暂时不兼容这么快的网速");
-                return;
-            }
-            Program.config.DownloadPath = DownloadPath_TextBox.Text;
-            Program.config.NetSpeed=int.Parse(NetSpeed_TextBox.Text);
-            Program.config.save();
-            MessageBox.Show("保存完成");
-        }
 
         private void NetSpeed_TextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -570,16 +582,6 @@ namespace BaiduPanDownload.Forms
             }
         }
 
-        private void button4_Click(object sender, EventArgs e)
-        {
-            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-            folderBrowserDialog.Description = "请选择下载目录";
-            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-            {
-                DownloadPath_TextBox.Text = folderBrowserDialog.SelectedPath;
-            }
-        }
-
         private void 终止ToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
             MessageBox.Show("当前版本无停止功能,请等待下个版本");
@@ -588,6 +590,21 @@ namespace BaiduPanDownload.Forms
         private void 继续ToolStripMenuItem_Click(object sender, EventArgs e)
         {
             TaskManager.GetTastManager.GetTaskByID(int.Parse(DownloadListView.SelectedItems[0].Text)).Start();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            new Setting().ShowDialog();
+        }
+
+        private void Path_ComboBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            new About().ShowDialog();
         }
     }
 }

@@ -29,6 +29,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -74,11 +76,16 @@
     <OutputPath>bin\x86\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.15.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
+      <HintPath>..\packages\log4net.2.0.5\lib\net40-full\log4net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net40\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
@@ -92,17 +99,27 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Operation\CopyInfo.cs" />
-    <Compile Include="Data\ListItem.cs" />
     <Compile Include="Data\DiskFileInfo.cs" />
     <Compile Include="Data\Operation\Delete.cs" />
-    <Compile Include="Data\Operation\ShareKey.cs" />
     <Compile Include="Data\SpaceInfo.cs" />
     <Compile Include="Data\Operation\SuperFile.cs" />
+    <Compile Include="Forms\About.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\About.Designer.cs">
+      <DependentUpon>About.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\AddDownload.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\AddDownload.Designer.cs">
       <DependentUpon>AddDownload.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\Download.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Download.Designer.cs">
+      <DependentUpon>Download.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\InPutCode.cs">
       <SubType>Form</SubType>
@@ -128,10 +145,18 @@
     <Compile Include="Forms\NewDir.Designer.cs">
       <DependentUpon>NewDir.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\Setting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\Setting.Designer.cs">
+      <DependentUpon>Setting.cs</DependentUpon>
+    </Compile>
     <Compile Include="HttpTool\Download\DownloadInfo.cs" />
     <Compile Include="HttpTool\Download\DownloadThread.cs" />
     <Compile Include="HttpTool\Download\HttpDownload.cs" />
+    <Compile Include="HttpTool\WebDownload.cs" />
     <Compile Include="Managers\CopyManager.cs" />
+    <Compile Include="Managers\SQLManager.cs" />
     <Compile Include="Managers\TaskManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -140,10 +165,20 @@
     <Compile Include="Util\FileTool\Config.cs" />
     <Compile Include="HttpTool\WebTool.cs" />
     <Compile Include="Util\FileTool\HashTool.cs" />
+    <Compile Include="Util\FileTool\LogTool.cs" />
+    <Compile Include="Util\ListViewRel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Util\ShowCommands.cs" />
     <Compile Include="Util\TaskState.cs" />
+    <EmbeddedResource Include="Forms\About.resx">
+      <DependentUpon>About.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\AddDownload.resx">
       <DependentUpon>AddDownload.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Download.resx">
+      <DependentUpon>Download.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\InPutCode.resx">
       <DependentUpon>InPutCode.cs</DependentUpon>
@@ -156,6 +191,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\NewDir.resx">
       <DependentUpon>NewDir.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\Setting.resx">
+      <DependentUpon>Setting.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -183,6 +221,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="20161006015142287_easyicon_net_64.ico" />
+    <Content Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.0">
@@ -201,8 +240,18 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="HttpTool\Upload\" />
+    <Folder Include="Resources\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="..\packages\Fody.1.28.3\build\Fody.targets" Condition="Exists('..\packages\Fody.1.28.3\build\Fody.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Fody.1.28.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.1.28.3\build\Fody.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

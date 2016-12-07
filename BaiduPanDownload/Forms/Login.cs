@@ -25,8 +25,6 @@ namespace BaiduPanDownload.Forms
 
         public Login()
         {
-            //InternetSetCookie("http://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=CuOLkaVfoz1zGsqFKDgfvI0h&redirect_uri=oob&scope=netdisk", "JSESSIONID",string.Empty);
-            
             InitializeComponent();
         }
 

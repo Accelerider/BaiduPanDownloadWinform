@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using BaiduPanDownload.Util.FileTool;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -48,6 +49,10 @@ namespace BaiduPanDownload.HttpTool.Download
         /// </summary>
         public bool Completed { get; private set; }
         /// <summary>
+        /// Cookies
+        /// </summary>
+        public CookiesData Cookies { get; set; }
+        /// <summary>
         /// 是否终止
         /// </summary>
         public bool Stoped { get; private set; }
@@ -65,18 +70,45 @@ namespace BaiduPanDownload.HttpTool.Download
                 Downloading = true;
                 Stoped = false;
                 HttpWebRequest Request = WebRequest.Create(Url) as HttpWebRequest;
+                Request.Referer= "http://pan.baidu.com/disk/home";
+                //第一次下载设置Cookies
+                if (Cookies != null)
+                {
+                    Cookie ck = new Cookie("BDUSS", Cookies.BDUSS);
+                    ck.Domain = ".baidu.com";
+                    Request.CookieContainer = new CookieContainer();
+                    Request.CookieContainer.Add(ck);
+                    ck = new Cookie("pcsett", Cookies.PCSETT);
+                    ck.Domain = ".baidu.com";
+                    Request.CookieContainer.Add(ck);
+                }
+                //改为获取Response之前读入数据文件,这样就能读取到Cookies了
+                if(File.Exists(DownloadPath + ".dcj"))
+                {
+                    Info = JsonConvert.DeserializeObject<DownloadInfo>(File.ReadAllText(DownloadPath + ".dcj"));
+                    if (Info.Cookies != null)
+                    {
+                        Cookie ck = new Cookie("BDUSS", Info.Cookies.BDUSS);
+                        ck.Domain = ".baidu.com";
+                        Request.CookieContainer = new CookieContainer();
+                        Request.CookieContainer.Add(ck);
+                        ck = new Cookie("pcsett", Info.Cookies.PCSETT);
+                        ck.Domain = ".baidu.com";
+                        Request.CookieContainer.Add(ck);
+                    }
+                }
                 HttpWebResponse Response = Request.GetResponse() as HttpWebResponse;
                 if (!File.Exists(DownloadPath + ".dcj"))
                 {
-                    DownloadInfo info = new DownloadInfo
+                    Info = new DownloadInfo
                     {
                         ContentLength=Response.ContentLength,
                         BlockLength=Response.ContentLength/ThreadNum,
-                        DownloadUrl = Url
+                        DownloadUrl = Url,
+                        Cookies=Cookies
                     };
-                    info.init(DownloadPath + ".dcj");
+                    Info.init(DownloadPath + ".dcj");
                 }
-                Info= JsonConvert.DeserializeObject<DownloadInfo>(File.ReadAllText(DownloadPath + ".dcj"));
                 if (Info.Completed)
                 {
                     Downloading = false;
@@ -86,13 +118,12 @@ namespace BaiduPanDownload.HttpTool.Download
                 }
                 if (!File.Exists(DownloadPath))
                 {
+                    LogTool.WriteLogDebug(typeof(HttpDownload),"正在创建文件: "+DownloadPath);
                     FileStream Stream = new FileStream(DownloadPath, FileMode.CreateNew);
                     Stream.SetLength(Response.ContentLength);
                     Stream.Close();
                 }
-                Console.WriteLine(Info.DownloadBlockList.Count);
                 Threads = new DownloadThread[Info.DownloadBlockList.Count];
-
                 for(int i = 0; i < Info.DownloadBlockList.Count; i++)
                 {
                     DownloadBlock Block= JsonConvert.DeserializeObject<DownloadBlock>(Info.DownloadBlockList[i].ToString());
@@ -112,7 +143,7 @@ namespace BaiduPanDownload.HttpTool.Download
             {
                 Downloading = false;
                 Stoped = true;
-                Console.WriteLine("出现错误: "+ex.ToString());
+                LogTool.WriteLogError(typeof(HttpDownload), "创建下载任务出现错误", ex);
             }
         }
 
@@ -121,14 +152,27 @@ namespace BaiduPanDownload.HttpTool.Download
             try
             {
                 HttpWebRequest Request = WebRequest.Create(Url) as HttpWebRequest;
+                Request.Referer = "http://pan.baidu.com/disk/home";
+                if (Cookies != null)
+                {
+                    Cookie ck = new Cookie("BDUSS", Cookies.BDUSS);
+                    ck.Domain = ".baidu.com";
+                    Request.CookieContainer = new CookieContainer();
+                    Request.CookieContainer.Add(ck);
+                    ck = new Cookie("pcsett", Cookies.PCSETT);
+                    ck.Domain = ".baidu.com";
+                    Request.CookieContainer.Add(ck);
+                }
                 HttpWebResponse Response = Request.GetResponse() as HttpWebResponse;
                 if (!File.Exists(DownloadPath + ".dcj"))
                 {
+                    LogTool.WriteLogDebug(typeof(HttpDownload),"正在创建文件: "+DownloadPath+".dcj");
                     DownloadInfo info = new DownloadInfo
                     {
                         ContentLength = Response.ContentLength,
                         BlockLength = Response.ContentLength / ThreadNum,
-                        DownloadUrl = Url
+                        DownloadUrl = Url,
+                        Cookies=Cookies
                     };
                     info.init(DownloadPath + ".dcj");
                 }
@@ -136,6 +180,7 @@ namespace BaiduPanDownload.HttpTool.Download
             }
             catch(Exception ex)
             {
+                LogTool.WriteLogError(typeof(HttpDownload), "创建数据文件出现错误", ex);
                 MessageBox.Show("创建数据文件时出现错误: "+ex.Message);
                 File.Delete(DownloadPath + ".dcj");
             }
