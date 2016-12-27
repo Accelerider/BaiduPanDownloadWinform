@@ -118,7 +118,13 @@ namespace BaiduPanDownload.Forms
 
         private void button2_Click(object sender, EventArgs e)
         {
+
             //从网盘下载
+            if (!Directory.Exists(textBox2.Text))
+            {
+                MessageBox.Show("下载路径不存在!");
+                return;
+            }
             if (Info != null)
             {
                 foreach (var SubFile in Info.getFileList())

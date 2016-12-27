@@ -1,4 +1,5 @@
-﻿using BaiduPanDownload.Util;
+﻿using BaiduPanDownload.HttpTool;
+using BaiduPanDownload.Util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,6 +19,10 @@ namespace BaiduPanDownload.Forms
 
     private const int INTERNET_OPTION_END_BROWSER_SESSION = 42;
 
+        [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern bool InternetGetCookieEx(string pchURL, string pchCookieName, StringBuilder pchCookieData, ref System.UInt32 pcchCookieData, int dwFlags, IntPtr lpReserved);
+        [DllImport("wininet.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        static extern int InternetSetCookieEx(string lpszURL, string lpszCookieName, string lpszCookieData, int dwFlags, IntPtr dwReserved);
         [DllImport("wininet.dll", SetLastError = true)]
         private static extern bool InternetSetOption(IntPtr hInternet, int dwOption, IntPtr lpBuffer, int lpdwBufferLength);
         [DllImport("shell32.dll")]
@@ -30,24 +35,21 @@ namespace BaiduPanDownload.Forms
 
         private void Login_Load(object sender, EventArgs e)
         {
-            webBrowser1.Url = new Uri("http://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=CuOLkaVfoz1zGsqFKDgfvI0h&redirect_uri=oob&scope=netdisk");
+            webBrowser1.Url = new Uri("http://www.139.sh");
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Regex rg = new Regex("(?<=(" + "access_token=" + "))[.\\s\\S]*?(?=(" + "&" + "))", RegexOptions.Multiline | RegexOptions.Singleline);
-            if (webBrowser1.Url == null)
+            Cookies cookies = new Cookies
             {
-                MessageBox.Show("尚未加载完成!");
-                return;
-            }
-            string token = rg.Match(webBrowser1.Url.ToString()).Value;
-            if (token == string.Empty)
+                CookiesStr = GetCookies("http://www.139.sh")
+            };
+            if (!cookies.Contains("Cookie_token"))
             {
                 MessageBox.Show("你似乎还没有登录呢");
                 return;
             }
-            Program.config.Access_Token = token;
+            Program.config.Access_Token = cookies.GetCookie("Cookie_token");
             Program.config.save();
             MessageBox.Show("保存完成");
             //ShellExecute(IntPtr.Zero, "open", "rundll32.exe", " InetCpl.cpl,ClearMyTracksByProcess 255", "", ShowCommands.SW_HIDE);
@@ -59,12 +61,34 @@ namespace BaiduPanDownload.Forms
         {
 
         }
-
+        string GetCookies(string url)
+        {
+            uint datasize = 256;
+            StringBuilder cookieData = new StringBuilder((int)datasize);
+            if (!InternetGetCookieEx(url, null, cookieData, ref datasize, 0x2000, IntPtr.Zero))
+            {
+                if (datasize < 0)
+                {
+                    return null;
+                }
+                cookieData = new StringBuilder((int)datasize);
+                if (!InternetGetCookieEx(url, null, cookieData, ref datasize, 0x00002000, IntPtr.Zero))
+                {
+                    return null;
+                }
+            }
+            return cookieData.ToString();
+        }
         private void button2_Click(object sender, EventArgs e)
         {
             ShellExecute(IntPtr.Zero, "open", "rundll32.exe", " InetCpl.cpl,ClearMyTracksByProcess 2", "", ShowCommands.SW_HIDE);
-            webBrowser1.Url = new Uri("http://www.baidu.com");
-            webBrowser1.Url = new Uri("http://openapi.baidu.com/oauth/2.0/authorize?response_type=token&client_id=CuOLkaVfoz1zGsqFKDgfvI0h&redirect_uri=oob&scope=netdisk");
+            this.Close();
+        }
+
+        private void webBrowser1_NewWindow(object sender, CancelEventArgs e)
+        {
+            e.Cancel = true;
+            webBrowser1.Navigate(webBrowser1.StatusText);
         }
     }
 }

@@ -151,6 +151,7 @@
     <Compile Include="Forms\Setting.Designer.cs">
       <DependentUpon>Setting.cs</DependentUpon>
     </Compile>
+    <Compile Include="HttpTool\Cookies.cs" />
     <Compile Include="HttpTool\Download\DownloadInfo.cs" />
     <Compile Include="HttpTool\Download\DownloadThread.cs" />
     <Compile Include="HttpTool\Download\HttpDownload.cs" />
