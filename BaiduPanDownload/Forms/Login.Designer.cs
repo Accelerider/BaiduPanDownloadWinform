@@ -46,6 +46,7 @@
             this.webBrowser1.Size = new System.Drawing.Size(814, 408);
             this.webBrowser1.TabIndex = 0;
             this.webBrowser1.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser1_DocumentCompleted);
+            this.webBrowser1.NewWindow += new System.ComponentModel.CancelEventHandler(this.webBrowser1_NewWindow);
             // 
             // label1
             // 
@@ -79,11 +80,11 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(446, 499);
+            this.label3.Location = new System.Drawing.Point(602, 500);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(293, 12);
+            this.label3.Size = new System.Drawing.Size(137, 12);
             this.label3.TabIndex = 4;
-            this.label3.Text = "当显示 【百度 OAuth2.0】时证明登录完成，请点击→";
+            this.label3.Text = "当登录完成时，请点击→";
             // 
             // button2
             // 

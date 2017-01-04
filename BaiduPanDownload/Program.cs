@@ -42,7 +42,7 @@ namespace BaiduPanDownload
                 MessageBox.Show("配置文件读取时出现意料之外的错误! 请删除程序目录下的Config.json重试!");
                 return;
             }
-            MessageBox.Show("注意:本版本为测试版,可能有意想不到的致命错误,反馈请在Github提交issues!");
+           // MessageBox.Show("注意:本版本为测试版,可能有意想不到的致命错误,反馈请在Github提交issues!");
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Main());

@@ -25,7 +25,7 @@ namespace BaiduPanDownload.Forms
     {
 
         string Path = string.Empty;
-        readonly string HomePath = "/apps/wp2pcs";
+        readonly string HomePath = "/apps/Gotoway";
 
         ArrayList DownloadList = new ArrayList();
 
@@ -272,8 +272,8 @@ namespace BaiduPanDownload.Forms
             try
             {
                 JObject job = JObject.Parse(WebTool.GetHtml("http://www.mrs4s.top/api/update.json"));
-                //版本12
-                if ((int)job["Build"] > 12)
+                //版本13
+                if ((int)job["Build"] > 13)
                 {
                     DialogResult dr = MessageBox.Show((string)job["Message"] + "\r\n\r\n是否更新?", "发现更新", MessageBoxButtons.OKCancel);
                     if (dr == DialogResult.OK)
