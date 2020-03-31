@@ -36,6 +36,8 @@ namespace BaiduPanDownload.Forms
         private void Login_Load(object sender, EventArgs e)
         {
             webBrowser1.Url = new Uri("http://www.139.sh");
+            webBrowser1.ScriptErrorsSuppressed = true;
+            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -59,7 +61,13 @@ namespace BaiduPanDownload.Forms
 
         private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-
+            if (webBrowser1.Document != null)
+                if (webBrowser1.Document.Window != null)
+                    webBrowser1.Document.Window.Error += Window_Error;
+        }
+        void Window_Error(object sender, HtmlElementErrorEventArgs e)
+        {
+            e.Handled = true;
         }
         string GetCookies(string url)
         {
